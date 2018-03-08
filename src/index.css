@@ -1,0 +1,19 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  box-sizing: border-box;
+}
+
+input, button {
+    outline: none;
+}
+
+input[type=button]:hover,
+input[type=submit]:hover,
+input[type=checkbox]:hover,
+input[type=radio]:hover,
+button:hover,
+a:hover {
+    cursor: pointer;
+}
