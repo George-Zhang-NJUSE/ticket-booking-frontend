@@ -27,7 +27,7 @@ export type CouponType = {
     isActivated: boolean    // 是否可供兑换
 };
 
-export type EventType = 'MUSIC' | 'OPERA' | 'SPORTS' | 'DANCE' | 'MOVIE';
+export type EventType = 'ALL' | 'MUSIC' | 'OPERA' | 'SPORTS' | 'DANCE' | 'MOVIE';
 
 export type Event = {
     eventId: number

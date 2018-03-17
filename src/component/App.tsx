@@ -9,7 +9,7 @@ export class App extends React.Component {
         return (
             <Layout>
                 <Header />
-                <Route path="/event/:type" component={EventFilter} />
+                <Route exact path="/" component={EventFilter} />
             </Layout>
         );
     }

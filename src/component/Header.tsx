@@ -2,14 +2,6 @@ import * as React from 'react';
 import { Row, Col, Menu } from 'antd';
 import { Link } from 'react-router-dom';
 
-const eventTypes = {
-    music: '音乐会',
-    opera: '戏剧歌剧',
-    sports: '体育赛事',
-    dance: '舞蹈',
-    movie: '电影'
-};
-
 export class Header extends React.Component<{}, { selectedKey: string }> {
 
     state = {
@@ -32,11 +24,6 @@ export class Header extends React.Component<{}, { selectedKey: string }> {
                         <Menu.Item key="main">
                             <Link to="/">首页</Link>
                         </Menu.Item>
-                        {Object.getOwnPropertyNames(eventTypes).map(key =>
-                            <Menu.Item key={key}>
-                                <Link to={`/event/${key}`}>{eventTypes[key]}</Link>
-                            </Menu.Item>
-                        )}
                         <Menu.Item key="login">
                             <Link to="/login">登录</Link>
                         </Menu.Item>

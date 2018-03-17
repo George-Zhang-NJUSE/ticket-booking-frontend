@@ -1,6 +1,10 @@
 import * as React from 'react';
+import { EventListProps, eventListInjector } from '../store/stores';
+import { observer, inject } from 'mobx-react';
 
-export class EventList extends React.Component {
+@inject(eventListInjector)
+@observer
+export class EventList extends React.Component<EventListProps> {
 
     render() {
         return (
