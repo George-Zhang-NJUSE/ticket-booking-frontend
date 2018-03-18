@@ -1,5 +1,5 @@
 import { configure } from 'mobx';
-import { IncomingEventList } from './eventList';
+import { MEventFeed } from './eventFeed';
 
 configure({ enforceActions: true });
 
@@ -8,17 +8,17 @@ type ProviderProps = {
 };
 
 type AllStores = {
-    incomingEventList: IncomingEventList
+    eventFeed: MEventFeed
 };
 
 export const stores: AllStores = {
-    incomingEventList: new IncomingEventList()
+    eventFeed: new MEventFeed()
 };
 
-export type EventListProps = {
-    eventList?: IncomingEventList;
+export type MEventFeedProps = {
+    eventFeed?: MEventFeed;
 };
 
-export const eventListInjector = (props: ProviderProps): EventListProps => ({
-    eventList: props.stores.incomingEventList
+export const eventFeedInjector = (props: ProviderProps): MEventFeedProps => ({
+    eventFeed: props.stores.eventFeed
 });

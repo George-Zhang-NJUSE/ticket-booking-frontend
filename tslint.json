@@ -36,21 +36,10 @@
         ],
         "member-ordering": [
             true,
-            "static-before-instance",
-            "variables-before-functions"
+            "static-before-instance"
         ],
         "no-arg": true,
         "no-bitwise": true,
-        "no-console": [
-            true,
-            "log",
-            "error",
-            "debug",
-            "info",
-            "time",
-            "timeEnd",
-            "trace"
-        ],
         "no-consecutive-blank-lines": true,
         "no-construct": true,
         "no-debugger": true,

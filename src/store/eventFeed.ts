@@ -1,4 +1,4 @@
-import { observable, action, reaction } from 'mobx';
+import { observable, action, reaction, flow } from 'mobx';
 import { message } from 'antd';
 import { Event, EventType, EventFilterType } from '../model/models';
 import { getEventList } from '../netAccess/event';
@@ -9,7 +9,7 @@ type Condition = {
     toTime: number
 };
 
-export class IncomingEventList {
+export class MEventFeed {
 
     filterType: EventFilterType = 'TYPE';
     pageSize = 10;
@@ -46,13 +46,13 @@ export class IncomingEventList {
         this.fetchMoreEvents();
     }
 
-    @action async fetchMoreEvents() {
+    @action fetchMoreEvents = flow(function* (this: MEventFeed) {
         if (!this.hasMorePage) {
             return;
         }
 
         try {
-            let eventsData = await getEventList({
+            let eventsData = yield getEventList({
                 type: this.filterType,
                 condition: this.eventType,
                 fromTime: this.fromTime,
@@ -67,8 +67,9 @@ export class IncomingEventList {
                 this.nextPageNum++;
             }
         } catch (err) {
+            console.log(err);
             message.error('出错啦!');
         }
-    }
+    });
 
 }
