@@ -56,6 +56,7 @@ export type EventSeatPrice = {
     venueSeatTypeId: number
     price: number
     venueSeatType: VenueSeatType
+    availableSeats?: number[][]     // 由客户端获取并加上，0表示可购买，1表示已售出
 };
 
 export type VenueSeatType = {
@@ -118,4 +119,9 @@ export type VenueChange = {
     newAddress: string
     newDescription: string
     newName: string
+};
+
+export type Seat = {
+    rowNum: number
+    columnNum: number
 };

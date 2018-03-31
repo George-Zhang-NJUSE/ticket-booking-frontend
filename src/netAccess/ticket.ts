@@ -16,3 +16,8 @@ export const checkTicket = (ticketId: number) => axios.put<void>(
     undefined,
     { params: { ticketId } }
 );
+
+export const getAvailableSeats = (eventId: number, venueSeatTypeId: number) => axios.get<number[][]>(
+    rootUrl + '/ticket/seat',
+    { params: { eventId, venueSeatTypeId } }
+).then(res => res.data);
