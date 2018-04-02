@@ -1,19 +1,21 @@
 import * as React from 'react';
 import { Layout, Radio, Button, Alert, List } from 'antd';
-import { match } from 'react-router-dom';
+import { match, Link } from 'react-router-dom';
+import { observer, inject } from 'mobx-react';
 import { Event, EventSeatPrice, Seat } from '../model/models';
 import { getEvent } from '../netAccess/event';
 import { getEventSeatPriceList } from '../netAccess/eventSeatPrice';
 import { getAvailableSeats } from '../netAccess/ticket';
 import { flattenArray } from '../util/objectUtil';
 import { SeatPicker } from './SeatPicker';
+import { MCurrentUserProps, currentOrderInjector, MCurrentOrderProps } from '../store/stores';
 
 const { Sider, Content } = Layout;
 const { Button: RadioButton, Group: RadioGroup } = Radio;
 
 type Props = {
     match: match<{ eventId: number }>
-};
+} & MCurrentUserProps & MCurrentOrderProps;
 
 type State = Event & {
     priceList: EventSeatPrice[]
@@ -21,6 +23,8 @@ type State = Event & {
     selectedSeats: Seat[]
 };
 
+@inject(currentOrderInjector)
+@observer
 export class EventDetail extends React.Component<Props, State> {
 
     state: State = {
@@ -85,6 +89,19 @@ export class EventDetail extends React.Component<Props, State> {
         this.setState({ selectedSeats });
     }
 
+    handleAddOrder = () => {
+        const currentOrder = this.props.currentOrder!,
+            selectedPrice = this.state.selectedPrice!,
+            eventId = this.state.eventId,
+            venueSeatTypeId = selectedPrice.venueSeatTypeId,
+            price = selectedPrice.price;
+
+        const tickets = this.state.selectedSeats.map(seat => ({ eventId, venueSeatTypeId, price, ...seat }));
+
+        currentOrder.setEventId(eventId);
+        currentOrder.setTickets(tickets);
+    }
+
     isAvailable(price: EventSeatPrice) {
         if (!price.availableSeats) {
             return false;
@@ -144,7 +161,9 @@ export class EventDetail extends React.Component<Props, State> {
                                     selectedSeats={selectedSeats}
                                     onToggle={this.handleToggleSeat}
                                 />
-                                <Button type="primary">购买</Button>
+                                <Link to="/addOrder">
+                                    <Button type="primary" onClick={this.handleAddOrder}>下单</Button>
+                                </Link>
                             </div>
                             : null}
                     </Content>

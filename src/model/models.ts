@@ -83,7 +83,7 @@ export type Order = {
     totalPrice: number
     createTime: number
     event: Event
-    tickets: Ticket[]
+    tickets: Ticket[] | Partial<Ticket>[]
     coupon: Coupon
 };
 
