@@ -3,12 +3,13 @@ import { Form, Icon, Input, Button, Select } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import { Role } from '../model/models';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
 
 type State = {
-    role: 'user' | 'venue' | 'manager'
+    role: Role
 };
 
 type RoleMap = {
@@ -16,23 +17,24 @@ type RoleMap = {
 };
 
 const roleMap: RoleMap = {
-    user: { idText: '邮箱', inputType: 'email', name: '普通用户' },
-    venue: { idText: '场馆号', inputType: 'number', name: '场馆工作人员' },
-    manager: { idText: '经理号', inputType: 'number', name: '平台经理' }
+    USER: { idText: '邮箱', inputType: 'email', name: '普通用户' },
+    VENUE: { idText: '场馆号', inputType: 'number', name: '场馆工作人员' },
+    MANAGER: { idText: '经理号', inputType: 'number', name: '平台经理' }
 };
 
-export class Login extends React.Component<FormComponentProps, State> {
+export class LoginForm extends React.Component<FormComponentProps, State> {
 
     state: State = {
-        role: 'user'
+        role: 'USER'
     };
 
-    handleSubmit = (e: FormEvent<any>) => {
+    handleSubmit = async (e: FormEvent<any>) => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 console.log('Received values of form: ', values);
                 // todo 使用表单值values登录
+                // loginUser()
             }
         });
     }
@@ -94,3 +96,5 @@ export class Login extends React.Component<FormComponentProps, State> {
         );
     }
 }
+
+export const Login = Form.create()(LoginForm);

@@ -9,6 +9,14 @@ export class MCurrentUser {
         return !!this.loggedUser;
     }
 
+    @computed get userLevelDiscount() {
+        if (!this.loggedUser) {
+            return 0;
+        }
+        const discountIncrement = 0.03;
+        return 1 - (this.loggedUser.level - 1) * discountIncrement;
+    }
+
     @action login(user: User) {
         this.loggedUser = user;
     }

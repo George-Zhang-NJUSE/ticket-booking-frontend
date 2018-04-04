@@ -14,6 +14,13 @@ export class MCurrentOrder {
 
     constructor(private currentUser: MCurrentUser) { }
 
+    @computed get totalPrice() {
+        const totalTicketPrice = this.tickets.reduce((prev: number, current) => current.price! + prev, 0);
+        const couponPrice = this.coupon ? this.coupon.couponType.price : 0;
+        const userDiscount = this.currentUser.userLevelDiscount;
+        return (totalTicketPrice - couponPrice) * userDiscount;
+    }
+
     @action setEventId(value: number) {
         this.eventId = value;
     }

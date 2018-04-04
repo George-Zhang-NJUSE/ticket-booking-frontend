@@ -125,3 +125,5 @@ export type Seat = {
     rowNum: number
     columnNum: number
 };
+
+export type Role = 'USER' | 'VENUE' | 'MANAGER';

@@ -17,6 +17,10 @@ export function flattenArray(arr: any[]): any[] {
     return result;
 }
 
+/**
+ * 使用结构化克隆算法进行对象的深拷贝
+ * @param obj 
+ */
 export function structuredClone(obj: any) {
     return new Promise(resolve => {
         const { port1, port2 } = new MessageChannel();

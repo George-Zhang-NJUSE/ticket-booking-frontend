@@ -12,7 +12,7 @@ export const modifyUser = (modifiedUser: User) => axios.put<User>(
     modifiedUser
 ).then(res => res.data);
 
-export const applyForNewUser = (newUser: Partial<User>) => axios.post(
+export const applyForNewUser = (newUser: Partial<User>) => axios.post<User>(
     rootUrl + '/user',
     newUser
 ).then(res => res.data);
