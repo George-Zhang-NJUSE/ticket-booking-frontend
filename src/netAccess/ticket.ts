@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { rootUrl } from './constant';
 import { Ticket } from '../model/models';
 
 /**
@@ -7,17 +6,17 @@ import { Ticket } from '../model/models';
  * 其余情况均通过Order接口购票
  */
 export const addNewTicket = (newTicket: Partial<Ticket>) => axios.post<Ticket>(
-    rootUrl + '/ticket',
+    '/ticket',
     newTicket
 ).then(res => res.data);
 
 export const checkTicket = (ticketId: number) => axios.put<void>(
-    rootUrl + '/ticket/check',
+    '/ticket/check',
     undefined,
     { params: { ticketId } }
 );
 
 export const getAvailableSeats = (eventId: number, venueSeatTypeId: number) => axios.get<number[][]>(
-    rootUrl + '/ticket/seat',
+    '/ticket/seat',
     { params: { eventId, venueSeatTypeId } }
 ).then(res => res.data);

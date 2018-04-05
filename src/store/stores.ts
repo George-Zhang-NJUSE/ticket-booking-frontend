@@ -1,6 +1,6 @@
 import { configure } from 'mobx';
 import { MEventFeed } from './eventFeed';
-import { MCurrentUser } from './currentUser';
+import { MCurrentAccount } from './currentAccount';
 import { MCurrentOrder } from './currentOrder';
 
 configure({ enforceActions: true });
@@ -11,16 +11,16 @@ type ProviderProps = {
 
 type AllStores = {
     eventFeed: MEventFeed
-    currentUser: MCurrentUser
+    currentAccount: MCurrentAccount
     currentOrder: MCurrentOrder
 };
 
 const eventFeed = new MEventFeed(),
-    currentUser = new MCurrentUser(),
-    currentOrder = new MCurrentOrder(currentUser);
+    currentAccount = new MCurrentAccount(),
+    currentOrder = new MCurrentOrder(currentAccount);
 
 export const stores: AllStores = {
-    eventFeed, currentOrder, currentUser
+    eventFeed, currentOrder, currentAccount
 };
 
 // 以下为各种store的注入
@@ -33,12 +33,12 @@ export const eventFeedInjector = (props: ProviderProps): MEventFeedProps => ({
     eventFeed: props.stores.eventFeed
 });
 
-export type MCurrentUserProps = {
-    currentUser?: MCurrentUser
+export type MCurrentAccountProps = {
+    currentAccount?: MCurrentAccount
 };
 
-export const currentUserInjector = (props: ProviderProps): MCurrentUserProps => ({
-    currentUser: props.stores.currentUser
+export const currentAccountInjector = (props: ProviderProps): MCurrentAccountProps => ({
+    currentAccount: props.stores.currentAccount
 });
 
 export type MCurrentOrderProps = {

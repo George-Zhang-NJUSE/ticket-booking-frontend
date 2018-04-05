@@ -8,14 +8,14 @@ import { getEventSeatPriceList } from '../netAccess/eventSeatPrice';
 import { getAvailableSeats } from '../netAccess/ticket';
 import { flattenArray } from '../util/objectUtil';
 import { SeatPicker } from './SeatPicker';
-import { MCurrentUserProps, currentOrderInjector, MCurrentOrderProps } from '../store/stores';
+import { MCurrentAccountProps, currentOrderInjector, MCurrentOrderProps } from '../store/stores';
 
 const { Sider, Content } = Layout;
 const { Button: RadioButton, Group: RadioGroup } = Radio;
 
 type Props = {
     match: match<{ eventId: number }>
-} & MCurrentUserProps & MCurrentOrderProps;
+} & MCurrentAccountProps & MCurrentOrderProps;
 
 type State = Event & {
     priceList: EventSeatPrice[]

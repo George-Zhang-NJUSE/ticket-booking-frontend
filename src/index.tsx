@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Route } from 'react-router-dom';
 import { Provider } from 'mobx-react';
 import { App } from './component/App';
 import registerServiceWorker from './registerServiceWorker';
@@ -11,7 +11,7 @@ import './index.css';
 ReactDOM.render(
     <Provider stores={stores} >
         <BrowserRouter>
-            <App />
+            <Route component={App} /> 
         </BrowserRouter>
     </Provider>,
     document.getElementById('root') as HTMLElement

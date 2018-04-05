@@ -67,7 +67,7 @@ export class MEventFeed {
                 this.nextPageNum++;
             }
         } catch (err) {
-            console.log(err);
+            console.error(err);
             message.error('出错啦!');
         }
     });

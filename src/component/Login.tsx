@@ -2,11 +2,17 @@ import * as React from 'react';
 import { Form, Icon, Input, Button, Select } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import { Role } from '../model/models';
+import { getAuth } from '../netAccess/authentication';
+import { inject, observer } from 'mobx-react';
+import { currentAccountInjector, MCurrentAccountProps } from '../store/stores';
+import { createAccount } from '../store/currentAccount';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
+
+type Props = FormComponentProps & MCurrentAccountProps;
 
 type State = {
     role: Role
@@ -22,19 +28,24 @@ const roleMap: RoleMap = {
     MANAGER: { idText: '经理号', inputType: 'number', name: '平台经理' }
 };
 
-export class LoginForm extends React.Component<FormComponentProps, State> {
+@inject(currentAccountInjector)
+@observer
+export class LoginForm extends React.Component<Props, State> {
 
     state: State = {
         role: 'USER'
     };
 
-    handleSubmit = async (e: FormEvent<any>) => {
+    handleSubmit = (e: FormEvent<any>) => {
         e.preventDefault();
-        this.props.form.validateFields((err, values) => {
+        this.props.form.validateFields(async (err, values) => {
             if (!err) {
                 console.log('Received values of form: ', values);
-                // todo 使用表单值values登录
-                // loginUser()
+                const role = this.state.role;
+                const data = await getAuth(values.id, values.password, role);
+                if (data) {
+                    this.props.currentAccount!.login(createAccount(role, data)!);
+                }
             }
         });
     }
@@ -44,11 +55,15 @@ export class LoginForm extends React.Component<FormComponentProps, State> {
     }
 
     render() {
+        if (this.props.currentAccount!.isLoggedIn) {
+            return <Redirect to="/" />;
+        }
+
         const { getFieldDecorator } = this.props.form;
         const { role } = this.state;
         const idType = roleMap[role];
         return (
-            <Form onSubmit={this.handleSubmit} className="login-form">
+            <Form onSubmit={this.handleSubmit} style={{ maxWidth: '300px' }}>
                 <FormItem>
                     {getFieldDecorator('role', {
                         rules: [
@@ -90,7 +105,8 @@ export class LoginForm extends React.Component<FormComponentProps, State> {
                 </FormItem>
                 <FormItem>
                     <Button type="primary" htmlType="submit" style={{ width: '100%' }}>登录</Button>
-                    <Link to="/apply">注册</Link>
+                    <Link to="/apply/user" style={{ marginRight: '16px' }}>用户注册</Link>
+                    <Link to="/apply/venue">场馆注册</Link>
                 </FormItem>
             </Form>
         );

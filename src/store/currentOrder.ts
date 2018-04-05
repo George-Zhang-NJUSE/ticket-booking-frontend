@@ -1,7 +1,7 @@
 import { observable, action, computed, flow } from 'mobx';
 import { message } from 'antd';
-import { Ticket, Coupon } from '../model/models';
-import { MCurrentUser } from './currentUser';
+import { Ticket, Coupon, User } from '../model/models';
+import { MCurrentAccount, MCurrentUser } from './currentAccount';
 import { addNewOrder } from '../netAccess/order';
 
 export class MCurrentOrder {
@@ -12,12 +12,16 @@ export class MCurrentOrder {
 
     @observable coupon: Coupon | null = null;
 
-    constructor(private currentUser: MCurrentUser) { }
+    constructor(private currentAccount: MCurrentAccount) { }
 
     @computed get totalPrice() {
+        const account = this.currentAccount.loggedAccount;
+        if ((!account) || account.role !== 'USER') {
+            return;
+        }
         const totalTicketPrice = this.tickets.reduce((prev: number, current) => current.price! + prev, 0);
         const couponPrice = this.coupon ? this.coupon.couponType.price : 0;
-        const userDiscount = this.currentUser.userLevelDiscount;
+        const userDiscount = (account as MCurrentUser).userLevelDiscount;
         return (totalTicketPrice - couponPrice) * userDiscount;
     }
 
@@ -40,13 +44,17 @@ export class MCurrentOrder {
     }
 
     @action generateOrder = flow(function* (this: MCurrentOrder) {
-        if (!this.currentUser.isLoggedIn) {
+        if (!this.currentAccount.isLoggedIn) {
+            return;
+        }
+        const account = this.currentAccount.loggedAccount;
+        if ((!account) || account.role !== 'USER') {
             return;
         }
         try {
             yield addNewOrder({
                 eventId: this.eventId,
-                userId: this.currentUser.loggedUser!.userId,
+                userId: (account.profile as User).userId,
                 tickets: this.tickets
             });
             this.clear();

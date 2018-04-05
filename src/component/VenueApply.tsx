@@ -1,17 +1,16 @@
 import * as React from 'react';
-import { Form, Input, Button, Radio, message } from 'antd';
+import { Form, Input, Button, message } from 'antd';
 import { FormComponentProps, ValidationRule } from 'antd/lib/form';
 import { FormEvent } from 'react';
-import { applyForNewUser } from '../netAccess/user';
+import { applyForNewVenue } from '../netAccess/venue';
 
 const FormItem = Form.Item;
-const RadioGroup = Radio.Group;
 
 type State = {
     isConfirmDirty: boolean
 };
 
-class UserApplyForm extends React.Component<FormComponentProps, State> {
+class VenueApplyForm extends React.Component<FormComponentProps, State> {
 
     state: State = {
         isConfirmDirty: false
@@ -23,13 +22,8 @@ class UserApplyForm extends React.Component<FormComponentProps, State> {
             if (!err) {
                 console.log('Received values of form: ', values);
                 delete values.confirm;
-                try {
-                    await applyForNewUser(values);
-                    message.success('注册成功！请前往您的邮箱完成账号激活方可登录。');
-                } catch (err) {
-                    console.log(err);
-                    message.error('出错啦！请检查你的网络连接。');
-                }
+                const result = await applyForNewVenue(values);
+                message.success(`提交申请成功！您的识别码为${result.venueId}。请等待管理员批准方可登录。`);
             }
         });
     }
@@ -84,35 +78,10 @@ class UserApplyForm extends React.Component<FormComponentProps, State> {
             <Form onSubmit={this.handleSubmit}>
                 <FormItem
                     {...formItemLayout}
-                    label="姓名"
+                    label="场馆名称"
                 >
                     {getFieldDecorator('name', {
-                        rules: [{ required: true, message: '请输入您的姓名！', whitespace: true }],
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
-                <FormItem
-                    {...formItemLayout}
-                    label="性别"
-                >
-                    {getFieldDecorator('gender')(
-                        <RadioGroup>
-                            <Radio value="男">男</Radio>
-                            <Radio value="女">女</Radio>
-                        </RadioGroup>
-                    )}
-                </FormItem>
-                <FormItem
-                    {...formItemLayout}
-                    label="邮箱"
-                >
-                    {getFieldDecorator('email', {
-                        rules: [{
-                            type: 'email', message: '邮箱格式不正确！',
-                        }, {
-                            required: true, message: '请输入您的邮箱！',
-                        }],
+                        rules: [{ required: true, message: '请输入场馆名称！', whitespace: true }],
                     })(
                         <Input />
                     )}
@@ -145,6 +114,26 @@ class UserApplyForm extends React.Component<FormComponentProps, State> {
                         <Input type="password" onBlur={this.handleConfirmBlur} />
                     )}
                 </FormItem>
+                <FormItem
+                    {...formItemLayout}
+                    label="地址"
+                >
+                    {getFieldDecorator('address', {
+                        rules: [{ required: true, message: '请输入场馆地址！', whitespace: true }],
+                    })(
+                        <Input />
+                    )}
+                </FormItem>
+                <FormItem
+                    {...formItemLayout}
+                    label="简介"
+                >
+                    {getFieldDecorator('description', {
+                        rules: [{ required: true, message: '请输入场馆简介！', whitespace: true }],
+                    })(
+                        <Input />
+                    )}
+                </FormItem>
                 <FormItem {...tailFormItemLayout}>
                     <Button type="primary" htmlType="submit">注册</Button>
                 </FormItem>
@@ -153,4 +142,4 @@ class UserApplyForm extends React.Component<FormComponentProps, State> {
     }
 }
 
-export const UserApply = Form.create()(UserApplyForm);
+export const VenueApply = Form.create()(VenueApplyForm);
