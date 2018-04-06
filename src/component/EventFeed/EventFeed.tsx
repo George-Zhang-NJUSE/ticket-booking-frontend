@@ -4,11 +4,11 @@ import { EventList } from './EventList';
 import { LoadMore } from './LoadMore';
 
 export function EventFeed() {
-    return (
-        <div>
-            <EventFilter />
-            <EventList />
-            <LoadMore />
-        </div>
-    );
+  return (
+    <div>
+      <EventFilter />
+      <EventList />
+      <LoadMore />
+    </div>
+  );
 }

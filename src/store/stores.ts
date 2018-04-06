@@ -6,45 +6,45 @@ import { MCurrentOrder } from './currentOrder';
 configure({ enforceActions: true });
 
 type ProviderProps = {
-    stores: AllStores
+  stores: AllStores
 };
 
 type AllStores = {
-    eventFeed: MEventFeed
-    currentAccount: MCurrentAccount
-    currentOrder: MCurrentOrder
+  eventFeed: MEventFeed
+  currentAccount: MCurrentAccount
+  currentOrder: MCurrentOrder
 };
 
 const eventFeed = new MEventFeed(),
-    currentAccount = new MCurrentAccount(),
-    currentOrder = new MCurrentOrder(currentAccount);
+  currentAccount = new MCurrentAccount(),
+  currentOrder = new MCurrentOrder(currentAccount);
 
 export const stores: AllStores = {
-    eventFeed, currentOrder, currentAccount
+  eventFeed, currentOrder, currentAccount
 };
 
 // 以下为各种store的注入
 
 export type MEventFeedProps = {
-    eventFeed?: MEventFeed;
+  eventFeed?: MEventFeed;
 };
 
 export const eventFeedInjector = (props: ProviderProps): MEventFeedProps => ({
-    eventFeed: props.stores.eventFeed
+  eventFeed: props.stores.eventFeed
 });
 
 export type MCurrentAccountProps = {
-    currentAccount?: MCurrentAccount
+  currentAccount?: MCurrentAccount
 };
 
 export const currentAccountInjector = (props: ProviderProps): MCurrentAccountProps => ({
-    currentAccount: props.stores.currentAccount
+  currentAccount: props.stores.currentAccount
 });
 
 export type MCurrentOrderProps = {
-    currentOrder?: MCurrentOrder
+  currentOrder?: MCurrentOrder
 };
 
 export const currentOrderInjector = (props: ProviderProps): MCurrentOrderProps => ({
-    currentOrder: props.stores.currentOrder
+  currentOrder: props.stores.currentOrder
 });

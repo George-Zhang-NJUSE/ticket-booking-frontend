@@ -1,36 +1,36 @@
 {
-    "name": "ticket-booking",
-    "version": "0.1.0",
-    "private": true,
-    "dependencies": {
-        "antd": "^3.3.0",
-        "axios": "^0.18.0",
-        "jwt-decode": "^2.2.0",
-        "mobx": "^4.1.0",
-        "mobx-react": "^5.0.0",
-        "react": "^16.2.0",
-        "react-dom": "^16.2.0",
-        "react-router-dom": "^4.2.2",
-        "react-scripts-ts": "2.13.0",
-        "styled-components": "^3.2.0"
-    },
-    "scripts": {
-        "start": "react-app-rewired start --scripts-version react-scripts-ts",
-        "build": "react-app-rewired build --scripts-version react-scripts-ts",
-        "test": "react-app-rewired test --env=jsdom --scripts-version react-scripts-ts",
-        "eject": "react-scripts-ts eject"
-    },
-    "devDependencies": {
-        "@types/jest": "^22.2.0",
-        "@types/jwt-decode": "^2.2.1",
-        "@types/node": "^9.4.6",
-        "@types/react": "^16.0.40",
-        "@types/react-dom": "^16.0.4",
-        "@types/react-router-dom": "^4.2.4",
-        "mobx-react-devtools": "^4.2.15",
-        "react-app-rewired": "^1.5.0",
-        "ts-import-plugin": "^1.4.4",
-        "typescript": "^2.7.2",
-        "typescript-styled-plugin": "^0.6.0"
-    }
+  "name": "ticket-booking",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "antd": "^3.3.0",
+    "axios": "^0.18.0",
+    "jwt-decode": "^2.2.0",
+    "mobx": "^4.1.0",
+    "mobx-react": "^5.0.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-router-dom": "^4.2.2",
+    "react-scripts-ts": "2.13.0",
+    "styled-components": "^3.2.0"
+  },
+  "scripts": {
+    "start": "react-app-rewired start --scripts-version react-scripts-ts",
+    "build": "react-app-rewired build --scripts-version react-scripts-ts",
+    "test": "react-app-rewired test --env=jsdom --scripts-version react-scripts-ts",
+    "eject": "react-scripts-ts eject"
+  },
+  "devDependencies": {
+    "@types/jest": "^22.2.0",
+    "@types/jwt-decode": "^2.2.1",
+    "@types/node": "^9.4.6",
+    "@types/react": "^16.0.40",
+    "@types/react-dom": "^16.0.4",
+    "@types/react-router-dom": "^4.2.4",
+    "mobx-react-devtools": "^4.2.15",
+    "react-app-rewired": "^1.5.0",
+    "ts-import-plugin": "^1.4.4",
+    "typescript": "^2.7.2",
+    "typescript-styled-plugin": "^0.6.0"
+  }
 }

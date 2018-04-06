@@ -5,6 +5,6 @@ import * as jwtDecode from 'jwt-decode';
  * @param bearerToken Json Web Token的响应头的Authorization部分，以'Bearer '开头
  */
 export function getJWTPayload(bearerToken: string): any {
-    const encodedJWT = bearerToken.split(' ')[1];
-    return jwtDecode(encodedJWT);
+  const encodedJWT = bearerToken.split(' ')[1];
+  return jwtDecode(encodedJWT);
 }

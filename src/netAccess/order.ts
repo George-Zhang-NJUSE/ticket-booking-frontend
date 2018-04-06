@@ -2,23 +2,23 @@ import axios from 'axios';
 import { Order } from '../model/models';
 
 export const getOrderList = (userId: number) => axios.get<Order[]>(
-    '/order',
-    { params: { userId } }
+  '/order',
+  { params: { userId } }
 ).then(res => res.data);
 
 export const addNewOrder = (newOrder: Partial<Order>) => axios.post<Order>(
-    '/order',
-    newOrder
+  '/order',
+  newOrder
 ).then(res => res.data);
 
 export const payOrder = (orderId: number) => axios.put<boolean>(
-    '/order/pay',
-    undefined,
-    { params: { orderId } }
+  '/order/pay',
+  undefined,
+  { params: { orderId } }
 ).then(res => res.data);
 
 export const cancelOrder = (orderId: number) => axios.put<void>(
-    '/order/cancel',
-    undefined,
-    { params: { orderId } }
+  '/order/cancel',
+  undefined,
+  { params: { orderId } }
 ).then(res => res.data);

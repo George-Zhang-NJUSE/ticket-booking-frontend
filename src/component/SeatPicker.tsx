@@ -9,13 +9,13 @@ const Row = styled.ol`
 `;
 
 const cellColor = {
-    0: '#d2ffd2',
-    1: 'yellow',
-    2: 'blue'
+  0: '#d2ffd2',
+  1: 'yellow',
+  2: 'blue'
 };
 
 type CellProps = {
-    state: number       // 0表示可选择，1表示已被他人选择，2表示已被自己选择
+  state: number       // 0表示可选择，1表示已被他人选择，2表示已被自己选择
 };
 
 const Cell = styled.li`
@@ -33,30 +33,30 @@ const Cell = styled.li`
 `;
 
 type Props = {
-    seatMap: number[][]
-    selectedSeats: Seat[]
-    onToggle: (rowNum: number, columnNum: number) => void
-    hidden?: boolean
+  seatMap: number[][]
+  selectedSeats: Seat[]
+  onToggle: (rowNum: number, columnNum: number) => void
+  hidden?: boolean
 };
 
 export function SeatPicker({ onToggle, seatMap, hidden = false, selectedSeats }: Props) {
-    return (
-        <div style={{ visibility: hidden ? 'hidden' : 'visible' }}>
-            {seatMap.map((row, rowNum) =>
-                <Row key={rowNum}>
-                    {row.map((state, columnNum) => {
-                        const isSelected = !!selectedSeats.find(
-                            s => s.rowNum === rowNum && s.columnNum === columnNum
-                        );
-                        return (
-                            <Cell
-                                key={columnNum}
-                                state={isSelected ? 2 : state}
-                                onClick={() => onToggle(rowNum, columnNum)}
-                            />
-                        );
-                    })}
-                </Row>)}
-        </div>
-    );
+  return (
+    <div style={{ visibility: hidden ? 'hidden' : 'visible' }}>
+      {seatMap.map((row, rowNum) =>
+        <Row key={rowNum}>
+          {row.map((state, columnNum) => {
+            const isSelected = !!selectedSeats.find(
+              s => s.rowNum === rowNum && s.columnNum === columnNum
+            );
+            return (
+              <Cell
+                key={columnNum}
+                state={isSelected ? 2 : state}
+                onClick={() => onToggle(rowNum, columnNum)}
+              />
+            );
+          })}
+        </Row>)}
+    </div>
+  );
 }

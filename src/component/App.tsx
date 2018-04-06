@@ -11,6 +11,7 @@ import { inject, observer } from 'mobx-react';
 import { Login } from './Login';
 import { UserApply } from './UserApply';
 import { VenueApply } from './VenueApply';
+import { UserSpace } from './UserSpace';
 
 type Props = MCurrentAccountProps & RouteComponentProps<undefined>;
 
@@ -20,21 +21,22 @@ export let history: History | null = null;
 @observer
 export class App extends React.Component<Props> {
 
-    componentDidMount() {
-        history = this.props.history;
-    }
+  componentDidMount() {
+    history = this.props.history;
+  }
 
-    render() {
-        return (
-            <Layout>
-                <Header />
-                <Route exact path="/" component={EventFeed} />
-                <Route path="/event/:eventId" component={EventDetail} />
-                <Route path="/apply/user" component={UserApply} />
-                <Route path="/apply/venue" component={VenueApply} />
-                <Route path="/login" component={Login} />
-                {/* <DevTools /> */}
-            </Layout>
-        );
-    }
+  render() {
+    return (
+      <Layout>
+        <Header />
+        <Route exact path="/" component={EventFeed} />
+        <Route path="/event/:eventId" component={EventDetail} />
+        <Route path="/apply/user" component={UserApply} />
+        <Route path="/apply/venue" component={VenueApply} />
+        <Route path="/login" component={Login} />
+        <Route path="/user" component={UserSpace} />
+        {/* <DevTools /> */}
+      </Layout>
+    );
+  }
 }

@@ -4,17 +4,17 @@
  * @returns 扁平化后的一维数组
  */
 export function flattenArray(arr: any[]): any[] {
-    let result: any[] = [];
-    (function readIn(a: any[]): void {
-        a.forEach(element => {
-            if (element instanceof Array) {
-                readIn(element);
-            } else {
-                result.push(element);
-            }
-        });
-    })(arr);
-    return result;
+  let result: any[] = [];
+  (function readIn(a: any[]): void {
+    a.forEach(element => {
+      if (element instanceof Array) {
+        readIn(element);
+      } else {
+        result.push(element);
+      }
+    });
+  })(arr);
+  return result;
 }
 
 /**
@@ -22,9 +22,9 @@ export function flattenArray(arr: any[]): any[] {
  * @param obj 
  */
 export function structuredClone(obj: any) {
-    return new Promise(resolve => {
-        const { port1, port2 } = new MessageChannel();
-        port2.onmessage = event => resolve(event.data);
-        port1.postMessage(obj);
-    });
+  return new Promise(resolve => {
+    const { port1, port2 } = new MessageChannel();
+    port2.onmessage = event => resolve(event.data);
+    port1.postMessage(obj);
+  });
 }

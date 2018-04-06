@@ -7,15 +7,15 @@ import { MEventFeedProps, eventFeedInjector } from '../../store/stores';
 @observer
 export class LoadMore extends React.Component<MEventFeedProps> {
 
-    handleLoadMore = () => {
-        this.props.eventFeed!.fetchMoreEvents();
-    }
+  handleLoadMore = () => {
+    this.props.eventFeed!.fetchMoreEvents();
+  }
 
-    render() {
-        return (
-            this.props.eventFeed!.hasMorePage ?
-                <Button type="primary" onClick={this.handleLoadMore}>加载更多</Button>
-                : <Alert type="info" message="没有更多活动了" showIcon />
-        );
-    }
+  render() {
+    return (
+      this.props.eventFeed!.hasMorePage ?
+        <Button type="primary" onClick={this.handleLoadMore}>加载更多</Button>
+        : <Alert type="info" message="没有更多活动了" showIcon />
+    );
+  }
 }

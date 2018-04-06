@@ -9,25 +9,25 @@ import { Link } from 'react-router-dom';
 @observer
 export class EventList extends React.Component<MEventFeedProps> {
 
-    render() {
-        const dataSource = this.props.eventFeed!.events.slice();
-        return (
-            <List
-                itemLayout="vertical"
-                size="large"
-                dataSource={dataSource}
-                renderItem={(item: Event) => (
-                    <List.Item
-                        key={item.eventId}
-                        extra={<img style={{ height: '200px' }} src={item.posterUrl} />}
-                    >
-                        <List.Item.Meta
-                            title={<Link to={'/event/' + item.eventId}>{item.eventName}</Link>}
-                            description={item.description}
-                        />
-                    </List.Item>
-                )}
+  render() {
+    const dataSource = this.props.eventFeed!.events.slice();
+    return (
+      <List
+        itemLayout="vertical"
+        size="large"
+        dataSource={dataSource}
+        renderItem={(item: Event) => (
+          <List.Item
+            key={item.eventId}
+            extra={<img style={{ height: '200px' }} src={item.posterUrl} />}
+          >
+            <List.Item.Meta
+              title={<Link to={'/event/' + item.eventId}>{item.eventName}</Link>}
+              description={item.description}
             />
-        );
-    }
+          </List.Item>
+        )}
+      />
+    );
+  }
 }

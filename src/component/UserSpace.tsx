@@ -1,0 +1,221 @@
+import * as React from 'react';
+import { MCurrentAccountProps, currentAccountInjector } from '../store/stores';
+import { inject, observer } from 'mobx-react';
+import { Collapse, Progress, List, Popover, Button, Popconfirm, message, Card, Tag } from 'antd';
+import { Redirect } from 'react-router';
+import { Order, User, OrderState, Ticket, TicketState } from '../model/models';
+import { getOrderList, cancelOrder, payOrder } from '../netAccess/order';
+import { Link } from 'react-router-dom';
+import { MCurrentUser } from '../store/currentAccount';
+
+const Panel = Collapse.Panel;
+
+type Props = MCurrentAccountProps;
+
+type State = {
+  orders: Order[]
+};
+
+const nextLevelScores = [0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500, 5500];
+
+const orderStateText: { [key in OrderState]: string } = {
+  PAID: '已支付',
+  UNPAID: '未支付',
+  CANCELED: '已取消',
+  COMPLETED: '已完成'
+};
+
+const ticketStateText: { [key in TicketState]: string } = {
+  NEW: '未检票',
+  CHECKED: '已检票',
+  CANCELED: '已取消'
+};
+
+@inject(currentAccountInjector)
+@observer
+export class UserSpace extends React.Component<Props, State> {
+
+  state: State = {
+    orders: []
+  };
+
+  componentDidMount() {
+    this.loadOrders();
+  }
+
+  refreshData() {
+    this.loadOrders();
+    const user = this.props.currentAccount!.loggedAccount! as MCurrentUser;
+    user.refreshProfile();
+  }
+
+  async loadOrders() {
+    const account = this.props.currentAccount!.loggedAccount;
+    if (!account) {
+      return;
+    }
+    const user = account.profile as User;
+    const orders = await getOrderList(user.userId);
+    this.setState({ orders });
+  }
+
+  async handleCancelOrder(orderId: number) {
+    await cancelOrder(orderId);
+    this.refreshData();
+  }
+
+  async handlePayOrder(orderId: number) {
+    const result = await payOrder(orderId);
+    if (result === true) {
+      message.success('支付成功！');
+      this.refreshData();
+    } else {
+      message.error('您的余额不足，支付失败！');
+    }
+  }
+
+  render() {
+    const { isLoggedIn, loggedAccount } = this.props.currentAccount!;
+    if (!isLoggedIn) {
+      return <Redirect to="/login" />;
+    }
+
+    if (loggedAccount!.role !== 'USER') {
+      return <Redirect to="/" />;
+    }
+
+    const { accumulatedScore, score, level, name, gender, balance, email } = loggedAccount!.profile as User;
+    const remainingScoreToNextLevel = nextLevelScores[level] - accumulatedScore;
+    const neededScoreToNextLevel = nextLevelScores[level] - nextLevelScores[level - 1];
+
+    const orders = this.state.orders;
+    const gridStyleSmall = {
+      width: '20%',
+      textAlign: 'center',
+    };
+    const gridStylebig = {
+      width: '50%',
+      textAlign: 'center',
+    };
+
+    return (
+      <Collapse defaultActiveKey={['info']}>
+        <Panel header="个人信息" key="info">
+          <p>姓名：{name}</p>
+          <p>性别：{gender}</p>
+          <p>邮箱：{email}</p>
+          <p>等级：{level}级</p>
+          {level < 11 ?
+            <div>
+              升级进度：
+              <Progress
+                percent={1 - remainingScoreToNextLevel / neededScoreToNextLevel}
+                size="small"
+                status="active"
+              />
+            </div>
+            : <p>已经是最高等级</p>
+          }
+          <p>还需{remainingScoreToNextLevel}分即可升级</p>
+          <p>账户余额：{balance}元</p>
+          <p>可用积分：{score}分</p>
+        </Panel>
+        <Panel header="订单" key="orders">
+          <List
+            itemLayout="horizontal"
+            dataSource={orders}
+            renderItem={(order: Order) => {
+              const ticketDetail = (
+                <List
+                  header="订票详情"
+                  size="small"
+                  bordered
+                  dataSource={order.tickets}
+                  renderItem={(t: Ticket) => (
+                    <List.Item key={t.ticketId}>
+                      <p>{t.venueSeatType.seatType}  {t.rowNum + 1}排{t.columnNum + 1}号</p>
+                      <Tag color="cyan" style={{ marginLeft: '16px' }}>{ticketStateText[t.ticketState]}</Tag>
+                    </List.Item>
+                  )}
+                />
+              );
+
+              const actions = [
+                <Popover key="ticketDetail" content={ticketDetail} trigger="click">
+                  <Button>查看详情</Button>
+                </Popover>
+              ];
+
+              // 根据订单状态添加支付或取消动作
+              const cancelOrderButton = (
+                <Popconfirm
+                  title="您确定要取消这个订单吗？"
+                  onConfirm={() => this.handleCancelOrder(order.orderId)}
+                  okText="确定"
+                  cancelText="算了"
+                >
+                  <Button type="danger">取消订单</Button>
+                </Popconfirm>
+              );
+
+              const payOrderButton = (
+                <Popconfirm
+                  title="您确定要支付这个订单吗？"
+                  onConfirm={() => this.handlePayOrder(order.orderId)}
+                  okText="确定"
+                  cancelText="算了"
+                >
+                  <Button type="primary">支付订单</Button>
+                </Popconfirm>
+              );
+
+              if (order.state === 'PAID') {
+                actions.push(cancelOrderButton);
+              } else if (order.state === 'UNPAID') {
+                actions.push(cancelOrderButton, payOrderButton);
+              }
+
+              return (
+                <List.Item
+                  key={order.orderId}
+                  actions={actions}
+                >
+                  <List.Item.Meta
+                    title={<Link to={`/event/${order.eventId}`}>{order.event.eventName}</Link>}
+                    description={`订单号：${order.orderId}`}
+                  />
+                  <div>
+                    <p>状态：{orderStateText[order.state]}</p>
+                    <p>总价：{order.totalPrice}</p>
+                    <p>创建时间：{new Date(order.createTime).toLocaleString()}</p>
+                  </div>
+                </List.Item>
+              );
+            }}
+          />
+        </Panel>
+        <Panel header="统计信息" key="statistics">
+          <Card title="订单">
+            <Card.Grid style={gridStyleSmall}>总订单数：{orders.length}</Card.Grid>
+            {Object.getOwnPropertyNames(orderStateText).map(state =>
+              <Card.Grid
+                key={state}
+                style={gridStyleSmall}
+              >
+                {orderStateText[state]}：{orders.filter(o => o.state === state).length}
+              </Card.Grid>
+            )}
+          </Card>
+          <Card title="金额">
+            <Card.Grid style={gridStylebig}>
+              已完成订单金额：{orders.reduce((accu, next) => accu + next.state === 'COMPLETED' ? next.totalPrice : 0, 0)}元
+            </Card.Grid>
+            <Card.Grid style={gridStylebig}>
+              累计获得积分：{accumulatedScore}分
+            </Card.Grid>
+          </Card>
+        </Panel>
+      </Collapse>
+    );
+  }
+}
