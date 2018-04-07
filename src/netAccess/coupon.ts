@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Coupon } from '../model/models';
 
-export const acquireCoupon = (userId: number, couponTypeId: number) => axios.post<Coupon>(
+export const acquireCoupon = (userId: number, couponTypeId: number) => axios.post<Coupon | null>(
   '/coupon',
   undefined,
   { params: { userId, couponTypeId } }

@@ -12,8 +12,12 @@ import { Login } from './Login';
 import { UserApply } from './UserApply';
 import { VenueApply } from './VenueApply';
 import { UserSpace } from './UserSpace';
+import { CouponCenter } from './CouponCenter';
+import { ModifyUserInfo } from './ModifyUserInfo';
+import { RoleRedirector } from './RoleRedirector';
+import { GenerateOrder } from './GenerateOrder';
 
-type Props = MCurrentAccountProps & RouteComponentProps<undefined>;
+type Props = MCurrentAccountProps & RouteComponentProps<{}>;
 
 export let history: History | null = null;
 
@@ -28,13 +32,17 @@ export class App extends React.Component<Props> {
   render() {
     return (
       <Layout>
-        <Header />
+        <Route component={Header} />
+        <Route component={RoleRedirector} />
         <Route exact path="/" component={EventFeed} />
         <Route path="/event/:eventId" component={EventDetail} />
         <Route path="/apply/user" component={UserApply} />
         <Route path="/apply/venue" component={VenueApply} />
         <Route path="/login" component={Login} />
         <Route path="/user" component={UserSpace} />
+        <Route path="/couponType" component={CouponCenter} />
+        <Route path="/modify/user" component={ModifyUserInfo} />
+        <Route path="/addOrder" component={GenerateOrder} />
         {/* <DevTools /> */}
       </Layout>
     );

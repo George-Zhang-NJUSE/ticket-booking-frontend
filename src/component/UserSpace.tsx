@@ -2,11 +2,11 @@ import * as React from 'react';
 import { MCurrentAccountProps, currentAccountInjector } from '../store/stores';
 import { inject, observer } from 'mobx-react';
 import { Collapse, Progress, List, Popover, Button, Popconfirm, message, Card, Tag } from 'antd';
-import { Redirect } from 'react-router';
-import { Order, User, OrderState, Ticket, TicketState } from '../model/models';
+import { Order, User, OrderState, Ticket, TicketState, Coupon } from '../model/models';
 import { getOrderList, cancelOrder, payOrder } from '../netAccess/order';
 import { Link } from 'react-router-dom';
 import { MCurrentUser } from '../store/currentAccount';
+import { getUserCouponList } from '../netAccess/coupon';
 
 const Panel = Collapse.Panel;
 
@@ -14,6 +14,7 @@ type Props = MCurrentAccountProps;
 
 type State = {
   orders: Order[]
+  coupons: Coupon[]
 };
 
 const nextLevelScores = [0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500, 5500];
@@ -36,27 +37,33 @@ const ticketStateText: { [key in TicketState]: string } = {
 export class UserSpace extends React.Component<Props, State> {
 
   state: State = {
-    orders: []
+    orders: [],
+    coupons: []
   };
 
   componentDidMount() {
-    this.loadOrders();
+    this.loadOrderAndCoupon();
   }
 
   refreshData() {
-    this.loadOrders();
+    this.loadOrderAndCoupon();
     const user = this.props.currentAccount!.loggedAccount! as MCurrentUser;
     user.refreshProfile();
   }
 
-  async loadOrders() {
+  async loadOrderAndCoupon() {
     const account = this.props.currentAccount!.loggedAccount;
     if (!account) {
       return;
     }
     const user = account.profile as User;
-    const orders = await getOrderList(user.userId);
-    this.setState({ orders });
+    const loadOrders = getOrderList(user.userId),
+      loadCoupons = getUserCouponList(user.userId);
+
+    this.setState({
+      orders: await loadOrders,
+      coupons: await loadCoupons
+    });
   }
 
   async handleCancelOrder(orderId: number) {
@@ -75,20 +82,16 @@ export class UserSpace extends React.Component<Props, State> {
   }
 
   render() {
-    const { isLoggedIn, loggedAccount } = this.props.currentAccount!;
-    if (!isLoggedIn) {
-      return <Redirect to="/login" />;
+    const { loggedAccount } = this.props.currentAccount!;
+    if (!loggedAccount) {
+      return null;
     }
 
-    if (loggedAccount!.role !== 'USER') {
-      return <Redirect to="/" />;
-    }
-
-    const { accumulatedScore, score, level, name, gender, balance, email } = loggedAccount!.profile as User;
+    const { accumulatedScore, score, level, name, gender, balance, email } = loggedAccount.profile as User;
     const remainingScoreToNextLevel = nextLevelScores[level] - accumulatedScore;
     const neededScoreToNextLevel = nextLevelScores[level] - nextLevelScores[level - 1];
 
-    const orders = this.state.orders;
+    const { orders, coupons } = this.state;
     const gridStyleSmall = {
       width: '20%',
       textAlign: 'center',
@@ -119,6 +122,9 @@ export class UserSpace extends React.Component<Props, State> {
           <p>还需{remainingScoreToNextLevel}分即可升级</p>
           <p>账户余额：{balance}元</p>
           <p>可用积分：{score}分</p>
+          <Button type="primary">
+            <Link to="/modify/user">修改</Link>
+          </Button>
         </Panel>
         <Panel header="订单" key="orders">
           <List
@@ -193,6 +199,24 @@ export class UserSpace extends React.Component<Props, State> {
               );
             }}
           />
+        </Panel>
+        <Panel header="优惠券" key="coupons">
+          <Card>
+            {coupons.map(c =>
+              <Card.Grid key={c.couponId} style={gridStyleSmall}>
+                {c.isUsed ?
+                  <Tag color="volcano">已使用</Tag>
+                  : null
+                }
+                <h3>{c.couponType.description}</h3>
+                {c.couponType.isActivated ?
+                  null
+                  : <p>当前不可用（网站方已禁用此种优惠券）</p>
+                }
+                <p>获取时间：{new Date(c.getTime).toLocaleString()}</p>
+              </Card.Grid>
+            )}
+          </Card>
         </Panel>
         <Panel header="统计信息" key="statistics">
           <Card title="订单">

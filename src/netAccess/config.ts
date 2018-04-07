@@ -13,8 +13,9 @@ axios.interceptors.response.use(undefined, (error) => {
       message.error('未登录或登录已过期，将跳转至登录界面。');
       stores.currentAccount.logout();
       // 界面跳转
-      // tslint:disable-next-line:no-unused-expression
       history && history.push('/login');
+    } else {
+      message.error('网络请求出错！');
     }
   } else if (error.request) {
     message.error('未接收到服务器回应，请检查您的网络连接。');
@@ -30,5 +31,9 @@ if (token) {
 }
 
 export function setAuthHeader(authToken: string) {
+  if (!authToken) {
+    delete axios.defaults.headers.common['Authorization'];
+    return;
+  }
   axios.defaults.headers.common['Authorization'] = authToken;
 }

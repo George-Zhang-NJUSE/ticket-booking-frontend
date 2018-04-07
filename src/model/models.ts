@@ -84,7 +84,7 @@ export type Order = {
   createTime: number
   event: Event
   tickets: Ticket[] | Partial<Ticket>[]
-  coupon: Coupon
+  coupon: Coupon | null
 };
 
 export type TicketState = 'NEW' | 'CANCELED' | 'CHECKED';

@@ -23,13 +23,8 @@ class UserApplyForm extends React.Component<FormComponentProps, State> {
       if (!err) {
         console.log('Received values of form: ', values);
         delete values.confirm;
-        try {
-          await applyForNewUser(values);
-          message.success('注册成功！请前往您的邮箱完成账号激活方可登录。');
-        } catch (err) {
-          console.log(err);
-          message.error('出错啦！请检查你的网络连接。');
-        }
+        await applyForNewUser(values);
+        message.success('注册成功！请前往您的邮箱完成账号激活方可登录。');
       }
     });
   }
@@ -96,7 +91,9 @@ class UserApplyForm extends React.Component<FormComponentProps, State> {
           {...formItemLayout}
           label="性别"
         >
-          {getFieldDecorator('gender')(
+          {getFieldDecorator('gender', {
+            rules: [{ required: true, message: '请选择您的性别！' }]
+          })(
             <RadioGroup>
               <Radio value="男">男</Radio>
               <Radio value="女">女</Radio>

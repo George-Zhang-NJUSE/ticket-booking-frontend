@@ -8,14 +8,15 @@ import { getEventSeatPriceList } from '../netAccess/eventSeatPrice';
 import { getAvailableSeats } from '../netAccess/ticket';
 import { flattenArray } from '../util/objectUtil';
 import { SeatPicker } from './SeatPicker';
-import { MCurrentAccountProps, currentOrderInjector, MCurrentOrderProps } from '../store/stores';
+import { currentOrderInjector, MCurrentOrderProps } from '../store/stores';
 
 const { Sider, Content } = Layout;
 const { Button: RadioButton, Group: RadioGroup } = Radio;
 
-type Props = RouteComponentProps<{ eventId: number }> & MCurrentAccountProps & MCurrentOrderProps;
+type Props = RouteComponentProps<{ eventId: number }> & MCurrentOrderProps;
 
-type State = Event & {
+type State = {
+  event: Event
   priceList: EventSeatPrice[]
   selectedPrice: EventSeatPrice | null
   selectedSeats: Seat[]
@@ -26,26 +27,28 @@ type State = Event & {
 export class EventDetail extends React.Component<Props, State> {
 
   state: State = {
-    description: '',
-    eventId: this.props.match.params.eventId,
-    eventName: '',
-    eventType: 'ALL',
-    hostTime: 0,
-    posterUrl: '',
-    venueId: 0,
+    event: {
+      description: '',
+      eventId: this.props.match.params.eventId,
+      eventName: '',
+      eventType: 'ALL',
+      hostTime: 0,
+      posterUrl: '',
+      venueId: 0,
+    },
     priceList: [],
     selectedPrice: null,
     selectedSeats: []
   };
 
   async componentDidMount() {
-    const eventId = this.state.eventId;
+    const eventId = this.state.event.eventId;
 
     // 避免两个请求串行化
     const fetchEvent = getEvent(eventId);
     const fetchSeatPrices = getEventSeatPriceList(eventId);
     const event = await fetchEvent, priceList = await fetchSeatPrices;
-    this.setState({ ...event, priceList });
+    this.setState({ event, priceList });
 
     // 获取可购座位
     await Promise.all(priceList.map(async price => {
@@ -90,14 +93,15 @@ export class EventDetail extends React.Component<Props, State> {
   handleAddOrder = () => {
     const currentOrder = this.props.currentOrder!,
       selectedPrice = this.state.selectedPrice!,
-      eventId = this.state.eventId,
+      eventId = this.state.event.eventId,
       venueSeatTypeId = selectedPrice.venueSeatTypeId,
       price = selectedPrice.price;
 
     const tickets = this.state.selectedSeats.map(seat => ({ eventId, venueSeatTypeId, price, ...seat }));
 
-    currentOrder.setEventId(eventId);
+    currentOrder.setEvent(this.state.event);
     currentOrder.setTickets(tickets);
+    currentOrder.setSelectedPrice(this.state.selectedPrice);
   }
 
   isAvailable(price: EventSeatPrice) {
@@ -109,8 +113,8 @@ export class EventDetail extends React.Component<Props, State> {
   }
 
   render() {
-    const { description, eventName, hostTime, posterUrl,
-      priceList, selectedPrice, selectedSeats } = this.state;
+    const { priceList, selectedPrice, selectedSeats } = this.state;
+    const { description, eventName, hostTime, posterUrl } = this.state.event;
     let hostDateStr = new Date(hostTime).toLocaleString();
     return (
       <Layout>
@@ -130,7 +134,7 @@ export class EventDetail extends React.Component<Props, State> {
             <h2>{eventName}</h2>
             <p>演出时间：{hostDateStr}</p>
             <div>选择票价：
-                            <RadioGroup onChange={this.handlePriceSelect}>
+              <RadioGroup onChange={this.handlePriceSelect}>
                 {priceList.map(price =>
                   <RadioButton
                     key={price.venueSeatTypeId}

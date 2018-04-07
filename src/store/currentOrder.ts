@@ -1,12 +1,13 @@
 import { observable, action, computed, flow } from 'mobx';
-import { message } from 'antd';
-import { Ticket, Coupon, User } from '../model/models';
+import { Ticket, Coupon, User, Event, EventSeatPrice } from '../model/models';
 import { MCurrentAccount, MCurrentUser } from './currentAccount';
 import { addNewOrder } from '../netAccess/order';
 
 export class MCurrentOrder {
 
-  @observable eventId = 0;
+  @observable event: Event | null = null;
+
+  @observable selectedPrice: EventSeatPrice | null = null;
 
   @observable tickets: Partial<Ticket>[] = [];
 
@@ -14,19 +15,28 @@ export class MCurrentOrder {
 
   constructor(private currentAccount: MCurrentAccount) { }
 
+  @computed get totalTicketPrice() {
+    return this.tickets.reduce((prev: number, current) => current.price! + prev, 0);
+  }
+
+  @computed get userLevelDiscount() {
+    const account = this.currentAccount.loggedAccount as MCurrentUser;
+    return account.userLevelDiscount;
+  }
+
   @computed get totalPrice() {
     const account = this.currentAccount.loggedAccount;
     if ((!account) || account.role !== 'USER') {
-      return;
+      return 0;
     }
-    const totalTicketPrice = this.tickets.reduce((prev: number, current) => current.price! + prev, 0);
+    const totalTicketPrice = this.totalTicketPrice;
     const couponPrice = this.coupon ? this.coupon.couponType.price : 0;
-    const userDiscount = (account as MCurrentUser).userLevelDiscount;
+    const userDiscount = this.userLevelDiscount;
     return (totalTicketPrice - couponPrice) * userDiscount;
   }
 
-  @action setEventId(value: number) {
-    this.eventId = value;
+  @action setEvent(value: Event | null) {
+    this.event = value;
   }
 
   @action setTickets(value: Partial<Ticket>[]) {
@@ -37,31 +47,35 @@ export class MCurrentOrder {
     this.coupon = value;
   }
 
+  @action setSelectedPrice(value: EventSeatPrice | null) {
+    this.selectedPrice = value;
+  }
+
   @action clear() {
-    this.eventId = 0;
+    this.event = null;
     this.tickets = [];
     this.coupon = null;
+    this.selectedPrice = null;
   }
 
   @action generateOrder = flow(function* (this: MCurrentOrder) {
     if (!this.currentAccount.isLoggedIn) {
       return;
     }
+    if (!this.event) {
+      return;
+    }
     const account = this.currentAccount.loggedAccount;
     if ((!account) || account.role !== 'USER') {
       return;
     }
-    try {
-      yield addNewOrder({
-        eventId: this.eventId,
-        userId: (account.profile as User).userId,
-        tickets: this.tickets
-      });
-      this.clear();
-    } catch (err) {
-      console.log(err);
-      message.error('出错啦！请检查你的网络连接。');
-    }
+    yield addNewOrder({
+      eventId: this.event.eventId,
+      userId: (account.profile as User).userId,
+      tickets: this.tickets,
+      coupon: this.coupon
+    });
+    this.clear();
   });
 
 }
