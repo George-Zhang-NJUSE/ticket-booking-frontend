@@ -2,8 +2,8 @@ import * as React from 'react';
 import { MCurrentAccountProps, currentAccountInjector } from '../store/stores';
 import { inject, observer } from 'mobx-react';
 import { Collapse, Progress, List, Popover, Button, Popconfirm, message, Card, Tag } from 'antd';
-import { Order, User, OrderState, Ticket, TicketState, Coupon } from '../model/models';
-import { getOrderList, cancelOrder, payOrder } from '../netAccess/order';
+import { Order, User, Ticket, Coupon, orderStateText, ticketStateText } from '../model/models';
+import { getUserOrderList, cancelOrder, payOrder } from '../netAccess/order';
 import { Link } from 'react-router-dom';
 import { MCurrentUser } from '../store/currentAccount';
 import { getUserCouponList } from '../netAccess/coupon';
@@ -18,19 +18,6 @@ type State = {
 };
 
 const nextLevelScores = [0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500, 5500];
-
-const orderStateText: { [key in OrderState]: string } = {
-  PAID: '已支付',
-  UNPAID: '未支付',
-  CANCELED: '已取消',
-  COMPLETED: '已完成'
-};
-
-const ticketStateText: { [key in TicketState]: string } = {
-  NEW: '未检票',
-  CHECKED: '已检票',
-  CANCELED: '已取消'
-};
 
 @inject(currentAccountInjector)
 @observer
@@ -57,7 +44,7 @@ export class UserSpace extends React.Component<Props, State> {
       return;
     }
     const user = account.profile as User;
-    const loadOrders = getOrderList(user.userId),
+    const loadOrders = getUserOrderList(user.userId),
       loadCoupons = getUserCouponList(user.userId);
 
     this.setState({
@@ -140,6 +127,7 @@ export class UserSpace extends React.Component<Props, State> {
                   renderItem={(t: Ticket) => (
                     <List.Item key={t.ticketId}>
                       <p>{t.venueSeatType.seatType}  {t.rowNum + 1}排{t.columnNum + 1}号</p>
+                      <p>门票号：{t.ticketId}</p>
                       <Tag color="cyan" style={{ marginLeft: '16px' }}>{ticketStateText[t.ticketState]}</Tag>
                     </List.Item>
                   )}
@@ -159,6 +147,7 @@ export class UserSpace extends React.Component<Props, State> {
                   onConfirm={() => this.handleCancelOrder(order.orderId)}
                   okText="确定"
                   cancelText="算了"
+                  key="cancel"
                 >
                   <Button type="danger">取消订单</Button>
                 </Popconfirm>
@@ -170,6 +159,7 @@ export class UserSpace extends React.Component<Props, State> {
                   onConfirm={() => this.handlePayOrder(order.orderId)}
                   okText="确定"
                   cancelText="算了"
+                  key="pay"
                 >
                   <Button type="primary">支付订单</Button>
                 </Popconfirm>

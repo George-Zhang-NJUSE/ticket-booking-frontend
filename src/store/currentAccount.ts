@@ -75,6 +75,11 @@ export class MCurrentVenue implements Account {
     this.profile = profile;
   }
 
+  @action refreshProfile = flow(function* (this: MCurrentVenue) {
+    const venue: Venue = yield getVenue(this.profile.venueId);
+    this.profile = venue;
+  });
+
 }
 
 export class MCurrentManager implements Account {
@@ -107,7 +112,7 @@ export async function createAccountFromAuthTokenBody(tokenBody: AuthTokenBody) {
   if (profile) {
     return createAccount(sub, profile);
   }
-  return undefined;
+  return null;
 }
 
 export function createAccount(role: Role, profile: User | Venue | Manager): Account {

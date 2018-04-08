@@ -2,24 +2,11 @@ import * as React from 'react';
 import * as moment from 'moment';
 import { DatePicker, Radio } from 'antd';
 import { observer, inject } from 'mobx-react';
-import { EventType } from '../../model/models';
+import { eventTypeText } from '../../model/models';
 import { eventFeedInjector, MEventFeedProps } from '../../store/stores';
 import { Moment } from 'moment';
 
 const { RangePicker } = DatePicker;
-
-type EventTypeMap = {
-  [key in EventType]: string
-};
-
-const eventTypeMap: EventTypeMap = {
-  ALL: '全部',
-  MUSIC: '音乐会',
-  OPERA: '戏剧歌剧',
-  SPORTS: '体育赛事',
-  DANCE: '舞蹈',
-  MOVIE: '电影'
-};
 
 @inject(eventFeedInjector)
 @observer
@@ -44,8 +31,8 @@ export class EventFilter extends React.Component<MEventFeedProps> {
       <div>
         <label>类型：
           <Radio.Group onChange={this.handleTypeChange} defaultValue={this.props.eventFeed!.eventType}>
-            {Object.getOwnPropertyNames(eventTypeMap).map(
-              key => <Radio.Button key={key} value={key}>{eventTypeMap[key]}</Radio.Button>
+            {Object.getOwnPropertyNames(eventTypeText).map(
+              key => <Radio.Button key={key} value={key}>{eventTypeText[key]}</Radio.Button>
             )}
           </Radio.Group>
         </label>

@@ -66,6 +66,7 @@ export type VenueSeatType = {
   quantity: number
   totalRowNum: number
   totalColumnNum: number
+  isDeleted: boolean
 };
 
 export type Manager = {
@@ -108,6 +109,7 @@ export type Venue = {
   description: string
   isApproved: boolean    // 场馆申请是否通过
   seatTypes: VenueSeatType[]
+  profit: number
 };
 
 export type VenueChangeState = 'PENDING' | 'APPROVED' | 'REJECTED';
@@ -132,4 +134,26 @@ export type Role = 'USER' | 'VENUE' | 'MANAGER';
 export type AuthTokenBody = {
   sub: Role
   id: number
+};
+
+export const eventTypeText: { [key in EventType]: string } = {
+  ALL: '全部',
+  MUSIC: '音乐会',
+  OPERA: '戏剧歌剧',
+  SPORTS: '体育赛事',
+  DANCE: '舞蹈',
+  MOVIE: '电影'
+};
+
+export const orderStateText: { [key in OrderState]: string } = {
+  PAID: '已支付',
+  UNPAID: '未支付',
+  CANCELED: '已取消',
+  COMPLETED: '已完成'
+};
+
+export const ticketStateText: { [key in TicketState]: string } = {
+  NEW: '未检票',
+  CHECKED: '已检票',
+  CANCELED: '已取消'
 };

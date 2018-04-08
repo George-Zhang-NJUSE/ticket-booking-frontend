@@ -20,3 +20,8 @@ export const getAvailableSeats = (eventId: number, venueSeatTypeId: number) => a
   '/ticket/seat',
   { params: { eventId, venueSeatTypeId } }
 ).then(res => res.data);
+
+export const getEventTicketList = (eventId: number) => axios.get<Ticket[]>(
+  '/ticket',
+  { params: { eventId } }
+).then(res => res.data);

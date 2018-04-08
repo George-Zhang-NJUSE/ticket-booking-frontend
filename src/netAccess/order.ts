@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Order } from '../model/models';
 
-export const getOrderList = (userId: number) => axios.get<Order[]>(
+export const getUserOrderList = (userId: number) => axios.get<Order[]>(
   '/order',
   { params: { userId } }
 ).then(res => res.data);
@@ -21,4 +21,9 @@ export const cancelOrder = (orderId: number) => axios.put<void>(
   '/order/cancel',
   undefined,
   { params: { orderId } }
+).then(res => res.data);
+
+export const getVenueOrderList = (venueId: number) => axios.get<Order[]>(
+  '/order/venue',
+  { params: { venueId } }
 ).then(res => res.data);
