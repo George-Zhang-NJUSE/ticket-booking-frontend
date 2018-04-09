@@ -51,8 +51,9 @@ class VenueChangeEditForm extends React.Component<Props> {
           >
             {getFieldDecorator('newName', {
               rules: [{ required: true, message: '请输入场馆名称！', whitespace: true }],
+              initialValue: oldName
             })(
-              <Input defaultValue={oldName} />
+              <Input />
             )}
           </FormItem>
           <FormItem
@@ -61,8 +62,9 @@ class VenueChangeEditForm extends React.Component<Props> {
           >
             {getFieldDecorator('newAddress', {
               rules: [{ required: true, message: '请输入场馆地址！', whitespace: true }],
+              initialValue: oldAddress
             })(
-              <Input defaultValue={oldAddress} />
+              <Input />
             )}
           </FormItem>
           <FormItem
@@ -71,8 +73,9 @@ class VenueChangeEditForm extends React.Component<Props> {
           >
             {getFieldDecorator('newDescription', {
               rules: [{ required: true, message: '请输入场馆简介！', whitespace: true }],
+              initialValue: oldDescription
             })(
-              <Input defaultValue={oldDescription} />
+              <Input />
             )}
           </FormItem>
         </Form>

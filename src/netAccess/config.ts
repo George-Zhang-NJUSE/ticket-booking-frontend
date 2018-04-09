@@ -23,6 +23,7 @@ axios.interceptors.response.use(undefined, (error) => {
   } else {
     message.error('建立网络请求时出错。');
   }
+  throw error;
 });
 
 const token = localStorage.getItem('token');

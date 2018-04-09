@@ -16,6 +16,7 @@ import { CouponCenter } from './CouponCenter';
 import { ModifyUserInfo } from './ModifyUserInfo';
 import { RoleRedirector } from './RoleRedirector';
 import { GenerateOrder } from './GenerateOrder';
+import { VenueSpace } from './VenueSpace';
 
 type Props = MCurrentAccountProps & RouteComponentProps<{}>;
 
@@ -43,6 +44,7 @@ export class App extends React.Component<Props> {
         <Route path="/couponType" component={CouponCenter} />
         <Route path="/modify/user" component={ModifyUserInfo} />
         <Route path="/addOrder" component={GenerateOrder} />
+        <Route path="/venue" component={VenueSpace} />
         {/* <DevTools /> */}
       </Layout>
     );

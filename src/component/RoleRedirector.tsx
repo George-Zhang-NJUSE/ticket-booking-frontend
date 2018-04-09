@@ -13,7 +13,7 @@ type RolePathConfig = {
   }
 };
 
-const config: RolePathConfig = {
+export const rolePathConfig: RolePathConfig = {
   MANAGER: {
     home: '/manager',
     permittedPaths: ['/couponType']
@@ -24,7 +24,7 @@ const config: RolePathConfig = {
   },
   VENUE: {
     home: '/venue',
-    permittedPaths: []
+    permittedPaths: ['/event']
   }
 };
 
@@ -40,7 +40,7 @@ export class RoleRedirector extends React.Component<Props> {
     }
 
     const role = loggedAccount.role;
-    const roleConfig = config[role];
+    const roleConfig = rolePathConfig[role];
     const availablePaths = roleConfig.permittedPaths.concat(roleConfig.home);
     const currentPath = location.pathname;
 

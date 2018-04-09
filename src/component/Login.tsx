@@ -25,8 +25,8 @@ type RoleMap = {
 
 const roleMap: RoleMap = {
   USER: { idText: '邮箱', inputType: 'email', name: '普通用户' },
-  VENUE: { idText: '场馆号', inputType: 'number', name: '场馆工作人员' },
-  MANAGER: { idText: '经理号', inputType: 'number', name: '平台经理' }
+  VENUE: { idText: '场馆号', inputType: 'string', name: '场馆工作人员' },
+  MANAGER: { idText: '经理号', inputType: 'string', name: '平台经理' }
 };
 
 @inject(currentAccountInjector)
@@ -49,7 +49,7 @@ export class LoginForm extends React.Component<Props, State> {
             const account = await createAccountFromAuthTokenBody(body);
             if (account) {
               this.props.currentAccount!.login(account);
-              this.props.history.push('/');
+              // this.props.history.push('/');
             }
           }
         } catch (error) {

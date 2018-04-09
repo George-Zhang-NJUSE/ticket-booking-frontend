@@ -35,6 +35,7 @@ export class EventDetail extends React.Component<Props, State> {
       hostTime: 0,
       posterUrl: '',
       venueId: 0,
+      isHosted: false
     },
     priceList: [],
     selectedPrice: null,

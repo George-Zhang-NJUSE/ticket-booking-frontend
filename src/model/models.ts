@@ -37,6 +37,7 @@ export type Event = {
   hostTime: number
   eventType: EventType
   posterUrl: string
+  isHosted: boolean
 };
 
 export type EventFilterType = 'VENUE' | 'TYPE';
@@ -102,14 +103,16 @@ export type Ticket = {
   venueSeatType: VenueSeatType
 };
 
+export type VenueApplyState = 'APPLYING' | 'APPROVED' | 'REJECTED';
+
 export type Venue = {
   venueId: number
   name: string
   address: string
   description: string
-  isApproved: boolean    // 场馆申请是否通过
   seatTypes: VenueSeatType[]
   profit: number
+  state: VenueApplyState
 };
 
 export type VenueChangeState = 'PENDING' | 'APPROVED' | 'REJECTED';
@@ -127,6 +130,18 @@ export type VenueChange = {
 export type Seat = {
   rowNum: number
   columnNum: number
+};
+
+export type Summary = {
+  summaryId: number
+  eventId: number
+  venueId: number
+  isHandled: boolean      // 已结算
+  event: Event
+  venue: Venue
+  totalMoney: number
+  platformIncome: number
+  venueIncome: number
 };
 
 export type Role = 'USER' | 'VENUE' | 'MANAGER';

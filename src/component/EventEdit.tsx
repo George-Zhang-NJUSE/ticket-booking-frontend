@@ -1,9 +1,12 @@
 import * as React from 'react';
-import { Form, Input, Modal, InputNumber } from 'antd';
+import * as moment from 'moment';
+import { Form, Input, Modal, Select, DatePicker } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
-import { Event } from '../model/models';
+import { Event, eventTypeText } from '../model/models';
+import { Moment } from 'moment';
 
 const FormItem = Form.Item;
+const Option = Select.Option;
 
 type Props = FormComponentProps & {
   visible: boolean
@@ -19,18 +22,29 @@ class EventEditForm extends React.Component<Props> {
     this.props.form.validateFields(async (err, values) => {
       if (!err) {
         console.log('Received values of form: ', values);
-        this.props.onCommit(values);
+        this.props.onCommit({ ...this.props.data, ...values });
       }
     });
+  }
+
+  isDisabledDate(value: Moment) {
+    // 不能选择今天之前的日期
+    return value < moment().startOf('day');
   }
 
   render() {
     const { getFieldDecorator } = this.props.form;
     const { data, visible, onCancel, action } = this.props;
-    const defaultValues = {
-      seatType: '',
-      totalRowNum: 1,
-      totalColumnNum: 1,
+
+    const eventTypeOptions = { ...eventTypeText };
+    delete eventTypeOptions.ALL;
+
+    const defaultValues: Partial<Event> = {
+      eventName: '',
+      description: '',
+      hostTime: 0,
+      eventType: 'MUSIC',
+      posterUrl: '',
       ...data
     };
     const formItemLayout = {
@@ -57,9 +71,10 @@ class EventEditForm extends React.Component<Props> {
             label="活动名称"
           >
             {getFieldDecorator('eventName', {
-              rules: [{ required: true, message: '请输入座位类型名称！', whitespace: true }],
+              rules: [{ required: true, message: '请输入活动名称！', whitespace: true }],
+              initialValue: defaultValues.eventName
             })(
-              <Input defaultValue={defaultValues} />
+              <Input />
             )}
           </FormItem>
           <FormItem
@@ -68,12 +83,15 @@ class EventEditForm extends React.Component<Props> {
           >
             {getFieldDecorator('eventType', {
               rules: [{
-                required: true, message: '请输入该类型座位总行数！', whitespace: true
-              }, {
-                type: 'number', min: 1, max: 5000
+                required: true, message: '请选择活动类型！', whitespace: true
               }],
+              initialValue: defaultValues.eventType
             })(
-              <InputNumber min={1} max={5000} defaultValue={defaultValues.totalRowNum} />
+              <Select placeholder="活动类型">
+                {Object.getOwnPropertyNames(eventTypeOptions).map(key =>
+                  <Option key={key} value={key}>{eventTypeOptions[key]}</Option>
+                )}
+              </Select>
             )}
           </FormItem>
           <FormItem
@@ -82,12 +100,16 @@ class EventEditForm extends React.Component<Props> {
           >
             {getFieldDecorator('hostTime', {
               rules: [{
-                required: true, message: '请输入该类型座位总行数！', whitespace: true
-              }, {
-                type: 'number', min: 1, max: 5000
+                type: 'number', required: true, message: '请输入活动举办时间！', whitespace: true,
+                transform: (value: Moment) => value.toDate().getTime()
               }],
+              initialValue: moment(defaultValues.hostTime)
             })(
-              <InputNumber min={1} max={5000} defaultValue={defaultValues.totalRowNum} />
+              <DatePicker
+                showTime
+                disabledDate={this.isDisabledDate}
+                format="YYYY-MM-DD HH:mm:ss"
+              />
             )}
           </FormItem>
           <FormItem
@@ -96,12 +118,11 @@ class EventEditForm extends React.Component<Props> {
           >
             {getFieldDecorator('description', {
               rules: [{
-                required: true, message: '请输入该类型座位总列数！', whitespace: true
-              }, {
-                type: 'number', min: 1, max: 5000
+                required: true, message: '请输入活动介绍！', whitespace: true
               }],
+              initialValue: defaultValues.description
             })(
-              <InputNumber min={1} max={5000} defaultValue={defaultValues.totalColumnNum} />
+              <Input />
             )}
           </FormItem>
           <FormItem
@@ -110,12 +131,11 @@ class EventEditForm extends React.Component<Props> {
           >
             {getFieldDecorator('posterUrl', {
               rules: [{
-                required: true, message: '请输入该类型座位总列数！', whitespace: true
-              }, {
-                type: 'number', min: 1, max: 5000
+                required: true, message: '请输入活动海报的url！', whitespace: true
               }],
+              initialValue: defaultValues.posterUrl
             })(
-              <InputNumber min={1} max={5000} defaultValue={defaultValues.totalColumnNum} />
+              <Input />
             )}
           </FormItem>
         </Form>

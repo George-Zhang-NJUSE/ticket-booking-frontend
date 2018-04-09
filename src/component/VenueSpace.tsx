@@ -1,21 +1,23 @@
 import * as React from 'react';
 import { MCurrentAccountProps, currentAccountInjector } from '../store/stores';
 import { inject, observer } from 'mobx-react';
-import { Collapse, List, Popover, Button, Popconfirm, Card, Tag, message, Modal } from 'antd';
+import { Collapse, List, Button, Popconfirm, Card, message, Tag } from 'antd';
 import {
   orderStateText, Venue, VenueSeatType, Event,
   eventTypeText, Order, Ticket, ticketStateText
 } from '../model/models';
 import { Link } from 'react-router-dom';
 import { MCurrentVenue } from '../store/currentAccount';
-import { getEventList } from '../netAccess/event';
+import { getEventList, modifyEvent, addNewEvent } from '../netAccess/event';
 import { deleteVenueSeatType, modifyVenueSeatType, addNewVenueSeatType } from '../netAccess/venueSeatType';
 import { getVenueOrderList } from '../netAccess/order';
-import { getEventTicketList } from '../netAccess/ticket';
+import { getEventTicketList, checkTicket } from '../netAccess/ticket';
 import { flattenArray } from '../util/objectUtil';
 import { addNewVenueChange } from '../netAccess/venueChange';
 import { VenueChangeEdit } from './VenueChangeEdit';
 import { SeatTypeEdit } from './SeatTypeEdit';
+import { EventEdit } from './EventEdit';
+import { TicketChecker } from './TicketChecker';
 
 const Panel = Collapse.Panel;
 
@@ -26,23 +28,31 @@ type State = {
   orders: Order[]
   tickets: Ticket[]
   editingSeatType: VenueSeatType | undefined
+  editingEvent: Event | undefined
   isVenueChangeEditVisible: boolean
   isSeatTypeEditVisible: boolean
   isSeatTypeAddVisible: boolean
+  isEventEditVisible: boolean
+  isEventAddVisible: boolean
+  isTicketCheckerVisible: boolean
 };
 
 @inject(currentAccountInjector)
 @observer
-export class UserSpace extends React.Component<Props, State> {
+export class VenueSpace extends React.Component<Props, State> {
 
   state: State = {
     events: [],
     orders: [],
     tickets: [],
     editingSeatType: undefined,
+    editingEvent: undefined,
     isVenueChangeEditVisible: false,
     isSeatTypeEditVisible: false,
-    isSeatTypeAddVisible: false
+    isSeatTypeAddVisible: false,
+    isEventAddVisible: false,
+    isEventEditVisible: false,
+    isTicketCheckerVisible: false
   };
 
   componentDidMount() {
@@ -52,6 +62,9 @@ export class UserSpace extends React.Component<Props, State> {
   async loadExtraData() {
     const account = this.props.currentAccount!.loggedAccount;
     if (!account) {
+      setTimeout(() => {
+        this.loadExtraData();
+      }, 1000);   // 重试
       return;
     }
     const venue = account.profile as Venue;
@@ -59,7 +72,7 @@ export class UserSpace extends React.Component<Props, State> {
       type: 'VENUE',
       condition: venue.venueId,
       fromTime: 0,
-      toTime: Date.now(),
+      toTime: Date.now() + 3 * 365 * 24 * 60 * 60 * 1000,
       pageSize: 10000,
       pageNum: 0
     });
@@ -79,6 +92,14 @@ export class UserSpace extends React.Component<Props, State> {
     venue.refreshProfile();
   }
 
+  getCurrentVenue() {
+    const account = this.props.currentAccount!.loggedAccount;
+    if (!account) {
+      return;
+    }
+    return account.profile as Venue;
+  }
+
   async handleDeleteSeatType(seatTypeId: number) {
     await deleteVenueSeatType(seatTypeId);
     message.success('删除成功！');
@@ -93,11 +114,10 @@ export class UserSpace extends React.Component<Props, State> {
   }
 
   handleSubmitAddSeatType = async (data: Partial<VenueSeatType>) => {
-    const account = this.props.currentAccount!.loggedAccount;
-    if (!account) {
+    const venue = this.getCurrentVenue();
+    if (!venue) {
       return;
     }
-    const venue = account.profile as Venue;
     await addNewVenueSeatType({
       venueId: venue.venueId,
       quantity: data.totalRowNum! * data.totalColumnNum!,
@@ -109,26 +129,51 @@ export class UserSpace extends React.Component<Props, State> {
   }
 
   handleSubmitVenueChange = async (newName: string, newAddress: string, newDescription: string) => {
-    const account = this.props.currentAccount!.loggedAccount;
-    if (!account) {
+    const venue = this.getCurrentVenue();
+    if (!venue) {
       return;
     }
-    const venue = account.profile as Venue;
     await addNewVenueChange({
       venueId: venue.venueId,
       newName,
       newAddress,
       newDescription
     });
-    message.success(`申请修改成功！请等待管理员审批。`);
+    message.success('申请修改成功！请等待管理员审批。');
     this.setState({ isVenueChangeEditVisible: false });
+  }
+
+  handleSubmitEditEvent = async (data: Event) => {
+    await modifyEvent(data);
+    message.success('修改成功！');
+    this.setState({ isEventEditVisible: false });
+    this.refreshData();
+  }
+
+  handleSubmitAddEvent = async (data: Partial<Event>) => {
+    const venue = this.getCurrentVenue();
+    if (!venue) {
+      return;
+    }
+    await addNewEvent({
+      venueId: venue.venueId,
+      ...data
+    });
+    message.success(`添加成功！`);
+    this.setState({ isEventAddVisible: false });
+    this.refreshData();
+  }
+
+  handleSubmitTicketChecker = async (ticketId: number) => {
+    await checkTicket(ticketId);
+    message.success(`检票成功！`);
   }
 
   showVenueChangeEdit = () => {
     this.setState({ isVenueChangeEditVisible: true });
   }
 
-  handleVenueChangeEditCancel = () => {
+  cancelVenueChangeEdit = () => {
     this.setState({ isVenueChangeEditVisible: false });
   }
 
@@ -136,7 +181,7 @@ export class UserSpace extends React.Component<Props, State> {
     this.setState({ isSeatTypeEditVisible: true, editingSeatType: data });
   }
 
-  handleSeatTypeEditCancel = () => {
+  cancelSeatTypeEdit = () => {
     this.setState({ isSeatTypeEditVisible: false, editingSeatType: undefined });
   }
 
@@ -144,8 +189,32 @@ export class UserSpace extends React.Component<Props, State> {
     this.setState({ isSeatTypeAddVisible: true });
   }
 
-  handleSeatTypeAddCancel = () => {
+  cancelSeatTypeAdd = () => {
     this.setState({ isSeatTypeAddVisible: false });
+  }
+
+  showEventEdit(data?: Event) {
+    this.setState({ isEventEditVisible: true, editingEvent: data });
+  }
+
+  cancelEventEdit = () => {
+    this.setState({ isEventEditVisible: false, editingEvent: undefined });
+  }
+
+  showEventAdd = () => {
+    this.setState({ isEventAddVisible: true });
+  }
+
+  cancelEventAdd = () => {
+    this.setState({ isEventAddVisible: false });
+  }
+
+  showTicketChecker = () => {
+    this.setState({ isTicketCheckerVisible: true });
+  }
+
+  cancelTicketChecker = () => {
+    this.setState({ isTicketCheckerVisible: false });
   }
 
   render() {
@@ -158,7 +227,8 @@ export class UserSpace extends React.Component<Props, State> {
     const availableSeatTypes = seatTypes.filter(s => !s.isDeleted);
 
     const { events, orders, tickets, isVenueChangeEditVisible,
-      editingSeatType, isSeatTypeAddVisible, isSeatTypeEditVisible } = this.state;
+      editingSeatType, isSeatTypeAddVisible, isSeatTypeEditVisible,
+      isEventAddVisible, isEventEditVisible, editingEvent, isTicketCheckerVisible } = this.state;
     const gridStyleSmall = {
       width: '20%',
       textAlign: 'center',
@@ -179,7 +249,7 @@ export class UserSpace extends React.Component<Props, State> {
           <VenueChangeEdit
             visible={isVenueChangeEditVisible}
             onCommit={this.handleSubmitVenueChange}
-            onCancel={this.handleVenueChangeEditCancel}
+            onCancel={this.cancelVenueChangeEdit}
             oldName={name}
             oldAddress={address}
             oldDescription={description}
@@ -226,46 +296,62 @@ export class UserSpace extends React.Component<Props, State> {
             action="编辑"
             data={editingSeatType}
             onCommit={this.handleSubmitEditSeatType}
-            onCancel={this.handleSeatTypeEditCancel}
+            onCancel={this.cancelSeatTypeEdit}
           />
           <Button type="primary" onClick={this.showSeatTypeAdd}>新增</Button>
           <SeatTypeEdit
             visible={isSeatTypeAddVisible}
             action="增加"
             onCommit={this.handleSubmitAddSeatType}
-            onCancel={this.handleSeatTypeAddCancel}
+            onCancel={this.cancelSeatTypeAdd}
           />
         </Panel>
         <Panel header="活动" key="events">
           <List
             dataSource={events}
-            renderItem={(e: Event) => {
-
-              // 编辑、检票、线下购票
-              const actions = [
-
-              ];  
-
-              return (
-                <List.Item
-                  key={e.eventId}
-                  extra={<img style={{ height: '200px' }} src={e.posterUrl} />}
-                  actions={[<Button key="edit">编辑</Button>]}
-                >
-                  <List.Item.Meta
-                    title={<Link to={'/event/' + e.eventId}>{e.eventName}</Link>}
-                    description={e.description}
-                  />
-                  <div>
-                    <p>活动类型：{eventTypeText[e.eventType]}</p>
-                    <p>活动号：{e.eventId}</p>
-                    <p>举行时间：{new Date(e.hostTime).toLocaleString()}</p>
-                  </div>
-                </List.Item>
-              );
-            }}
+            renderItem={(e: Event) => (
+              <List.Item
+                key={e.eventId}
+                extra={<img style={{ height: '200px' }} src={e.posterUrl} />}
+                actions={e.isHosted ?
+                  undefined
+                  : [
+                    <Button key="edit" onClick={() => this.showEventEdit(e)}>编辑</Button>,
+                    <Button key="check" type="primary" onClick={this.showTicketChecker}>检票</Button>
+                  ]}
+              >
+                <List.Item.Meta
+                  title={<Link to={'/event/' + e.eventId}>{e.eventName}</Link>}
+                  description={e.description}
+                />
+                <div>
+                  {e.isHosted ? <Tag color="cyan">已举行</Tag> : null}
+                  <p>活动类型：{eventTypeText[e.eventType]}</p>
+                  <p>活动号：{e.eventId}</p>
+                  <p>举行时间：{new Date(e.hostTime).toLocaleString()}</p>
+                </div>
+              </List.Item>
+            )}
           />
-          <Button type="primary">增加</Button>
+          <EventEdit
+            visible={isEventEditVisible}
+            action="编辑"
+            data={editingEvent}
+            onCommit={this.handleSubmitEditEvent}
+            onCancel={this.cancelEventEdit}
+          />
+          <EventEdit
+            visible={isEventAddVisible}
+            action="增加"
+            onCommit={this.handleSubmitAddEvent}
+            onCancel={this.cancelEventAdd}
+          />
+          <TicketChecker
+            visible={isTicketCheckerVisible}
+            onCancel={this.cancelTicketChecker}
+            onCommit={this.handleSubmitTicketChecker}
+          />
+          <Button type="primary" onClick={this.showEventAdd}>增加</Button>
         </Panel>
         <Panel header="统计信息" key="statistics">
           <Card title="订单">
@@ -295,7 +381,7 @@ export class UserSpace extends React.Component<Props, State> {
               已完成订单金额：{orders.reduce((accu, next) => accu + next.state === 'COMPLETED' ? next.totalPrice : 0, 0)}元
             </Card.Grid>
             <Card.Grid style={gridStylebig}>
-              累计受益：{profit}元
+              累计收益：{profit}元
             </Card.Grid>
           </Card>
         </Panel>
