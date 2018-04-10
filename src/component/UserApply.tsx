@@ -3,15 +3,18 @@ import { Form, Input, Button, Radio, message } from 'antd';
 import { FormComponentProps, ValidationRule } from 'antd/lib/form';
 import { FormEvent } from 'react';
 import { applyForNewUser } from '../netAccess/user';
+import { RouteComponentProps } from 'react-router-dom';
 
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
+
+type Props = FormComponentProps & RouteComponentProps<{}>;
 
 type State = {
   isConfirmDirty: boolean
 };
 
-class UserApplyForm extends React.Component<FormComponentProps, State> {
+class UserApplyForm extends React.Component<Props, State> {
 
   state: State = {
     isConfirmDirty: false
@@ -25,6 +28,7 @@ class UserApplyForm extends React.Component<FormComponentProps, State> {
         delete values.confirm;
         await applyForNewUser(values);
         message.success('注册成功！请前往您的邮箱完成账号激活方可登录。');
+        this.props.history.goBack();
       }
     });
   }

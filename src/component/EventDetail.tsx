@@ -1,27 +1,29 @@
 import * as React from 'react';
-import { Layout, Radio, Button, Alert, List } from 'antd';
+import { Layout, Radio, Button, Alert, List, message } from 'antd';
 import { Link, RouteComponentProps } from 'react-router-dom';
 import { observer, inject } from 'mobx-react';
 import { Event, EventSeatPrice, Seat } from '../model/models';
 import { getEvent } from '../netAccess/event';
-import { getEventSeatPriceList } from '../netAccess/eventSeatPrice';
-import { getAvailableSeats } from '../netAccess/ticket';
+import { getAvailableSeats, addNewTicket } from '../netAccess/ticket';
 import { flattenArray } from '../util/objectUtil';
 import { SeatPicker } from './SeatPicker';
-import { currentOrderInjector, MCurrentOrderProps } from '../store/stores';
+import {
+  currentOrderInjector, MCurrentOrderProps,
+  currentAccountInjector, MCurrentAccountProps
+} from '../store/stores';
 
 const { Sider, Content } = Layout;
 const { Button: RadioButton, Group: RadioGroup } = Radio;
 
-type Props = RouteComponentProps<{ eventId: number }> & MCurrentOrderProps;
+type Props = RouteComponentProps<{ eventId: number }> & MCurrentOrderProps & MCurrentAccountProps;
 
 type State = {
   event: Event
-  priceList: EventSeatPrice[]
   selectedPrice: EventSeatPrice | null
   selectedSeats: Seat[]
 };
 
+@inject(currentAccountInjector)
 @inject(currentOrderInjector)
 @observer
 export class EventDetail extends React.Component<Props, State> {
@@ -35,27 +37,30 @@ export class EventDetail extends React.Component<Props, State> {
       hostTime: 0,
       posterUrl: '',
       venueId: 0,
-      isHosted: false
+      isHosted: false,
+      seatPrices: []
     },
-    priceList: [],
     selectedPrice: null,
     selectedSeats: []
   };
 
-  async componentDidMount() {
-    const eventId = this.state.event.eventId;
+  componentDidMount() {
+    this.refreshData();
+  }
 
-    // 避免两个请求串行化
-    const fetchEvent = getEvent(eventId);
-    const fetchSeatPrices = getEventSeatPriceList(eventId);
-    const event = await fetchEvent, priceList = await fetchSeatPrices;
-    this.setState({ event, priceList });
+  async refreshData() {
+    // 清空状态
+    this.setState({ selectedPrice: null, selectedSeats: [] });
+
+    const eventId = this.state.event.eventId;
+    const event = await getEvent(eventId);
+    this.setState({ event });
 
     // 获取可购座位
-    await Promise.all(priceList.map(async price => {
+    await Promise.all(event.seatPrices.map(async price => {
       price.availableSeats = await getAvailableSeats(eventId, price.venueSeatTypeId);
     }));
-    this.setState({ priceList });
+    this.forceUpdate();
   }
 
   handlePriceSelect = (event: any) => {
@@ -105,6 +110,22 @@ export class EventDetail extends React.Component<Props, State> {
     currentOrder.setSelectedPrice(this.state.selectedPrice);
   }
 
+  handleBuyOfflineTicket = async () => {
+    if (this.state.selectedSeats.length === 0) {
+      return;
+    }
+    const selectedPrice = this.state.selectedPrice!,
+      eventId = this.state.event.eventId,
+      venueSeatTypeId = selectedPrice.venueSeatTypeId,
+      price = selectedPrice.price,
+      isOnline = false;
+
+    const tickets = this.state.selectedSeats.map(seat => ({ eventId, venueSeatTypeId, price, isOnline, ...seat }));
+    await Promise.all(tickets.map(t => addNewTicket(t)));
+    message.success('购买成功');
+    this.refreshData();
+  }
+
   isAvailable(price: EventSeatPrice) {
     if (!price.availableSeats) {
       return false;
@@ -114,8 +135,12 @@ export class EventDetail extends React.Component<Props, State> {
   }
 
   render() {
-    const { priceList, selectedPrice, selectedSeats } = this.state;
-    const { description, eventName, hostTime, posterUrl } = this.state.event;
+    const { selectedPrice, selectedSeats } = this.state;
+    const { description, eventName, hostTime, posterUrl, seatPrices } = this.state.event;
+
+    const loggedAccount = this.props.currentAccount!.loggedAccount;
+    const isOffline = loggedAccount && loggedAccount.role === 'VENUE';
+
     let hostDateStr = new Date(hostTime).toLocaleString();
     return (
       <Layout>
@@ -136,7 +161,7 @@ export class EventDetail extends React.Component<Props, State> {
             <p>演出时间：{hostDateStr}</p>
             <div>选择票价：
               <RadioGroup onChange={this.handlePriceSelect}>
-                {priceList.map(price =>
+                {seatPrices.map(price =>
                   <RadioButton
                     key={price.venueSeatTypeId}
                     value={price}
@@ -169,9 +194,11 @@ export class EventDetail extends React.Component<Props, State> {
                   selectedSeats={selectedSeats}
                   onToggle={this.handleToggleSeat}
                 />
-                <Link to="/addOrder">
-                  <Button type="primary" onClick={this.handleAddOrder}>下单</Button>
-                </Link>
+                {isOffline ?
+                  <Button onClick={this.handleBuyOfflineTicket}>线下购买</Button>
+                  : <Link to="/addOrder">
+                    <Button type="primary" onClick={this.handleAddOrder}>下单</Button>
+                  </Link>}
               </div>
               : null}
           </Content>

@@ -3,8 +3,13 @@ import { observer, inject } from 'mobx-react';
 import { currentAccountInjector, MCurrentAccountProps } from '../store/stores';
 import { RouteComponentProps, Redirect } from 'react-router-dom';
 import { Role } from '../model/models';
+import { message } from 'antd';
 
 type Props = MCurrentAccountProps & RouteComponentProps<{}>;
+
+type State = {
+  redirect: string | null;
+};
 
 type RolePathConfig = {
   [key in Role]: {
@@ -30,13 +35,17 @@ export const rolePathConfig: RolePathConfig = {
 
 @inject(currentAccountInjector)
 @observer
-export class RoleRedirector extends React.Component<Props> {
+export class RoleRedirector extends React.Component<Props, State> {
 
-  render() {
-    const { loggedAccount } = this.props.currentAccount!;
-    const { location } = this.props;
+  state: State = {
+    redirect: null
+  };
+
+  componentWillReceiveProps(nextProps: Props) {
+    const { loggedAccount } = nextProps.currentAccount!;
+    const { location } = nextProps;
     if (!loggedAccount) {
-      return null;
+      return this.setState({ redirect: null });
     }
 
     const role = loggedAccount.role;
@@ -53,9 +62,19 @@ export class RoleRedirector extends React.Component<Props> {
     });
 
     if (isPermitted) {
-      return null;
+      return this.setState({ redirect: null });
     } else {
-      return <Redirect to={roleConfig.home} />;
+      message.error('您没有权限查看该页面！');
+      return this.setState({ redirect: roleConfig.home });
+    }
+  }
+
+  render() {
+    const redirect = this.state.redirect;
+    if (redirect) {
+      return <Redirect to={redirect} />;
+    } else {
+      return null;
     }
   }
 

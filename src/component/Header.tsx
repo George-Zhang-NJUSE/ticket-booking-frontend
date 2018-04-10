@@ -52,6 +52,12 @@ export class Header extends React.Component<Props> {
             <Menu.Item key="couponType">
               <Link to="/couponType">优惠券中心</Link>
             </Menu.Item>
+            <Menu.Item key="venue">
+              <Link to="/venue">场馆控制台</Link>
+            </Menu.Item>
+            <Menu.Item key="manager">
+              <Link to="/manager">经理控制台</Link>
+            </Menu.Item>
           </Menu>
         </Col>
       </Row>

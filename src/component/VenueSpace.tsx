@@ -67,6 +67,10 @@ export class VenueSpace extends React.Component<Props, State> {
       }, 1000);   // 重试
       return;
     }
+    if (account.role !== 'VENUE') {
+      return;
+    }
+
     const venue = account.profile as Venue;
     const getAllEvents = getEventList({
       type: 'VENUE',
@@ -146,7 +150,7 @@ export class VenueSpace extends React.Component<Props, State> {
   handleSubmitEditEvent = async (data: Event) => {
     await modifyEvent(data);
     message.success('修改成功！');
-    this.setState({ isEventEditVisible: false });
+    this.setState({ isEventEditVisible: false, editingEvent: undefined });
     this.refreshData();
   }
 
@@ -167,6 +171,8 @@ export class VenueSpace extends React.Component<Props, State> {
   handleSubmitTicketChecker = async (ticketId: number) => {
     await checkTicket(ticketId);
     message.success(`检票成功！`);
+    this.setState({ isTicketCheckerVisible: false });
+    this.refreshData();
   }
 
   showVenueChangeEdit = () => {
@@ -219,7 +225,7 @@ export class VenueSpace extends React.Component<Props, State> {
 
   render() {
     const { loggedAccount } = this.props.currentAccount!;
-    if (!loggedAccount) {
+    if (!loggedAccount || loggedAccount.role !== 'VENUE') {
       return null;
     }
 
@@ -337,12 +343,14 @@ export class VenueSpace extends React.Component<Props, State> {
             visible={isEventEditVisible}
             action="编辑"
             data={editingEvent}
+            seatTypes={availableSeatTypes}
             onCommit={this.handleSubmitEditEvent}
             onCancel={this.cancelEventEdit}
           />
           <EventEdit
             visible={isEventAddVisible}
             action="增加"
+            seatTypes={availableSeatTypes}
             onCommit={this.handleSubmitAddEvent}
             onCancel={this.cancelEventAdd}
           />

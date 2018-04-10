@@ -38,6 +38,7 @@ export type Event = {
   eventType: EventType
   posterUrl: string
   isHosted: boolean
+  seatPrices: EventSeatPrice[]
 };
 
 export type EventFilterType = 'VENUE' | 'TYPE';
@@ -53,7 +54,6 @@ export type EventFilter = {
 
 export type EventSeatPrice = {
   eventSeatPriceId: number
-  eventId: number
   venueSeatTypeId: number
   price: number
   venueSeatType: VenueSeatType
@@ -125,6 +125,7 @@ export type VenueChange = {
   newAddress: string
   newDescription: string
   newName: string
+  venue: Venue
 };
 
 export type Seat = {
@@ -142,6 +143,13 @@ export type Summary = {
   totalMoney: number
   platformIncome: number
   venueIncome: number
+};
+
+export type Statistics = {
+  activatedUserNum: number
+  maleUserNum: number
+  femaleUserNum: number
+  approvedVenueNum: number
 };
 
 export type Role = 'USER' | 'VENUE' | 'MANAGER';

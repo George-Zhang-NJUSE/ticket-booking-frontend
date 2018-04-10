@@ -1,8 +1,8 @@
 import * as React from 'react';
 import * as moment from 'moment';
-import { Form, Input, Modal, Select, DatePicker } from 'antd';
+import { Form, Input, Modal, Select, DatePicker, InputNumber } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
-import { Event, eventTypeText } from '../model/models';
+import { Event, eventTypeText, VenueSeatType } from '../model/models';
 import { Moment } from 'moment';
 
 const FormItem = Form.Item;
@@ -14,6 +14,7 @@ type Props = FormComponentProps & {
   action: '编辑' | '增加'
   onCommit: (data: Partial<Event> | Event) => void
   onCancel: () => void
+  seatTypes: VenueSeatType[]
 };
 
 class EventEditForm extends React.Component<Props> {
@@ -22,7 +23,19 @@ class EventEditForm extends React.Component<Props> {
     this.props.form.validateFields(async (err, values) => {
       if (!err) {
         console.log('Received values of form: ', values);
-        this.props.onCommit({ ...this.props.data, ...values });
+        // 获取座位定价
+        const { data, onCommit, seatTypes } = this.props;
+        const seatPrices = seatTypes.map(seatType => {
+          const venueSeatTypeId = seatType.venueSeatTypeId;
+          const key = `seatPrice-${venueSeatTypeId}`;
+          const price = values[key] as number;
+          delete values[key];
+          return {
+            venueSeatTypeId,
+            price
+          };
+        });
+        onCommit({ ...data, ...values, seatPrices });
       }
     });
   }
@@ -34,7 +47,7 @@ class EventEditForm extends React.Component<Props> {
 
   render() {
     const { getFieldDecorator } = this.props.form;
-    const { data, visible, onCancel, action } = this.props;
+    const { data, visible, onCancel, action, seatTypes } = this.props;
 
     const eventTypeOptions = { ...eventTypeText };
     delete eventTypeOptions.ALL;
@@ -42,11 +55,21 @@ class EventEditForm extends React.Component<Props> {
     const defaultValues: Partial<Event> = {
       eventName: '',
       description: '',
-      hostTime: 0,
+      hostTime: Date.now(),
       eventType: 'MUSIC',
       posterUrl: '',
+      seatPrices: [],
       ...data
     };
+
+    const getDefaultSeatPrice = (venueSeatTypeId: number) => {
+      const seatPrice = defaultValues.seatPrices!.find(p => p.venueSeatTypeId === venueSeatTypeId);
+      if (!seatPrice) {
+        return 1;
+      }
+      return seatPrice.price;
+    };
+
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },
@@ -63,7 +86,7 @@ class EventEditForm extends React.Component<Props> {
         visible={visible}
         onOk={this.handleSubmit}
         onCancel={onCancel}
-        destroyOnClose={action === '增加'}
+        destroyOnClose
       >
         <Form>
           <FormItem
@@ -138,6 +161,23 @@ class EventEditForm extends React.Component<Props> {
               <Input />
             )}
           </FormItem>
+          {seatTypes.map(t => (
+            <FormItem
+              {...formItemLayout}
+              label={t.seatType + '价格'}
+              key={t.venueSeatTypeId}
+            >
+              {getFieldDecorator(`seatPrice-${t.venueSeatTypeId}`, {
+                rules: [{
+                  type: 'number', required: true, message: '请输入座位定价！', whitespace: true,
+                  min: 1, max: 10000
+                }],
+                initialValue: getDefaultSeatPrice(t.venueSeatTypeId)
+              })(
+                <InputNumber min={1} max={10000} />
+              )}
+            </FormItem>
+          ))}
         </Form>
       </Modal>
     );

@@ -29,18 +29,21 @@ export class UserSpace extends React.Component<Props, State> {
   };
 
   componentDidMount() {
-    this.loadOrderAndCoupon();
+    this.refreshData();
   }
 
   refreshData() {
+    const account = this.props.currentAccount!.loggedAccount;
+    if (!account || account.role !== 'USER') {
+      return;
+    }
     this.loadOrderAndCoupon();
-    const user = this.props.currentAccount!.loggedAccount! as MCurrentUser;
-    user.refreshProfile();
+    (account as MCurrentUser).refreshProfile();
   }
 
   async loadOrderAndCoupon() {
     const account = this.props.currentAccount!.loggedAccount;
-    if (!account) {
+    if (!account || account.role !== 'USER') {
       return;
     }
     const user = account.profile as User;
@@ -70,7 +73,7 @@ export class UserSpace extends React.Component<Props, State> {
 
   render() {
     const { loggedAccount } = this.props.currentAccount!;
-    if (!loggedAccount) {
+    if (!loggedAccount || loggedAccount.role !== 'USER') {
       return null;
     }
 
@@ -99,7 +102,7 @@ export class UserSpace extends React.Component<Props, State> {
             <div>
               升级进度：
               <Progress
-                percent={1 - remainingScoreToNextLevel / neededScoreToNextLevel}
+                percent={Math.round((1 - remainingScoreToNextLevel / neededScoreToNextLevel) * 100)}
                 size="small"
                 status="active"
               />

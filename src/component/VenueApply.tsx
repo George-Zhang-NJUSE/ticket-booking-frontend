@@ -3,14 +3,17 @@ import { Form, Input, Button, message } from 'antd';
 import { FormComponentProps, ValidationRule } from 'antd/lib/form';
 import { FormEvent } from 'react';
 import { applyForNewVenue } from '../netAccess/venue';
+import { RouteComponentProps } from 'react-router-dom';
 
 const FormItem = Form.Item;
+
+type Props = FormComponentProps & RouteComponentProps<{}>;
 
 type State = {
   isConfirmDirty: boolean
 };
 
-class VenueApplyForm extends React.Component<FormComponentProps, State> {
+class VenueApplyForm extends React.Component<Props, State> {
 
   state: State = {
     isConfirmDirty: false
@@ -24,6 +27,7 @@ class VenueApplyForm extends React.Component<FormComponentProps, State> {
         delete values.confirm;
         const result = await applyForNewVenue(values);
         message.success(`提交申请成功！您的识别码为${result.venueId}。请等待管理员批准方可登录。`, 5);
+        this.props.history.goBack();
       }
     });
   }

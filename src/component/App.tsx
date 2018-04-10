@@ -17,6 +17,7 @@ import { ModifyUserInfo } from './ModifyUserInfo';
 import { RoleRedirector } from './RoleRedirector';
 import { GenerateOrder } from './GenerateOrder';
 import { VenueSpace } from './VenueSpace';
+import { ManagerSpace } from './ManagerSpace';
 
 type Props = MCurrentAccountProps & RouteComponentProps<{}>;
 
@@ -45,6 +46,7 @@ export class App extends React.Component<Props> {
         <Route path="/modify/user" component={ModifyUserInfo} />
         <Route path="/addOrder" component={GenerateOrder} />
         <Route path="/venue" component={VenueSpace} />
+        <Route path="/manager" component={ManagerSpace} />
         {/* <DevTools /> */}
       </Layout>
     );

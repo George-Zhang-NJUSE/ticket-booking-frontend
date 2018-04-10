@@ -43,6 +43,7 @@ class VenueChangeEditForm extends React.Component<Props> {
         visible={visible}
         onOk={this.handleSubmit}
         onCancel={onCancel}
+        destroyOnClose
       >
         <Form>
           <FormItem

@@ -16,3 +16,7 @@ export const setVenueApplicationApproved = (venueId: number, isApproved: boolean
   undefined,
   { params: { venueId, isApproved } }
 ).then(res => res.data);
+
+export const getApplyingVenueList = () => axios.get<Venue[]>(
+  '/venue/applying'
+).then(res => res.data);

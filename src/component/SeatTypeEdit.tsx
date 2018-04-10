@@ -49,7 +49,7 @@ class SeatTypeEditForm extends React.Component<Props> {
         visible={visible}
         onOk={this.handleSubmit}
         onCancel={onCancel}
-        destroyOnClose={action === '增加'}
+        destroyOnClose
       >
         <Form>
           <FormItem
