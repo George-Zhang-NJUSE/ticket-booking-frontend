@@ -235,6 +235,7 @@ export class VenueSpace extends React.Component<Props, State> {
     const { events, orders, tickets, isVenueChangeEditVisible,
       editingSeatType, isSeatTypeAddVisible, isSeatTypeEditVisible,
       isEventAddVisible, isEventEditVisible, editingEvent, isTicketCheckerVisible } = this.state;
+        
     const gridStyleSmall = {
       width: '20%',
       textAlign: 'center',
@@ -385,9 +386,6 @@ export class VenueSpace extends React.Component<Props, State> {
             )}
           </Card>
           <Card title="金额">
-            <Card.Grid style={gridStylebig}>
-              已完成订单金额：{orders.reduce((accu, next) => accu + next.state === 'COMPLETED' ? next.totalPrice : 0, 0)}元
-            </Card.Grid>
             <Card.Grid style={gridStylebig}>
               累计收益：{profit}元
             </Card.Grid>
